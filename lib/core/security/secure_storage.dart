@@ -1,3 +1,4 @@
+import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:notes_vault/core/enums/app_enums.dart';
 
@@ -18,6 +19,10 @@ class SecureStorage{
 
   static Future<void> write(AppKeys key, String value) async {
     await _secureStorage.write(key: _getAppKey(key).toString(), value: value);
+  }
+
+  static Future<void> setAppPin(String pin) async {
+    await write(AppKeys.appPin, BCrypt.hashpw(pin, BCrypt.gensalt()));
   }
 
   static Future<String?> read(AppKeys key) async {

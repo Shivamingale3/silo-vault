@@ -4,11 +4,13 @@ import 'package:flutter/services.dart';
 class PinInput extends StatefulWidget {
   final Function(String) onPinComplete;
   final bool obscurePin;
+  final bool enabled;
 
   const PinInput({
     super.key,
     required this.onPinComplete,
     required this.obscurePin,
+    required this.enabled,
   });
 
   @override
@@ -45,6 +47,7 @@ class _PinInputState extends State<PinInput> {
     return SizedBox(
       width: 50,
       child: TextField(
+        enabled: widget.enabled,
         controller: controllers[index],
         focusNode: focusNodes[index],
         keyboardType: TextInputType.number,
