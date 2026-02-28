@@ -20,37 +20,27 @@ class PinInput extends StatefulWidget {
 class _PinInputState extends State<PinInput> {
   final controllers = List.generate(4, (index) => TextEditingController());
   final focusNodes = List.generate(4, (index) => FocusNode());
+
   @override
   void initState() {
     super.initState();
-
-    // Wait until widget is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       focusNodes[0].requestFocus();
     });
   }
 
+  @override
+  void dispose() {
+    for (final controller in controllers) {
+      controller.dispose();
+    }
+    for (final node in focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
   String getPin() => controllers.map((c) => c.text).join();
-
-  void handleInput(String value, int index) {
-    if (value.isNotEmpty) {
-      if (index < controllers.length - 1) {
-        FocusScope.of(context).requestFocus(focusNodes[index + 1]);
-      } else {
-        widget.onPinComplete(getPin());
-      }
-    } else {
-      if (index > 0) {
-        FocusScope.of(context).requestFocus(focusNodes[index - 1]);
-      }
-    }
-  }
-
-  void handleBackspace(String value, int index) {
-    if (value.isEmpty && index > 0) {
-      FocusScope.of(context).requestFocus(focusNodes[index - 1]);
-    }
-  }
 
   Widget buildBox(int index) {
     return SizedBox(

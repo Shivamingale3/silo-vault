@@ -6,8 +6,8 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(error?.toString() ?? "An error occurred"),
+    return Scaffold(
+      body: Center(child: Text(error?.toString() ?? "An error occurred")),
     );
   }
 }

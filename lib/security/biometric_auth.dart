@@ -1,21 +1,19 @@
 import 'package:local_auth/local_auth.dart';
 import 'package:notes_vault/core/enums/security_enums.dart';
+import 'package:app_settings/app_settings.dart';
 
 class BiometricAuth {
   static final LocalAuthentication auth = LocalAuthentication();
 
-  static Future<void> authenticate() async {
-    try {
-      bool authenticated = await auth.authenticate(
-        localizedReason: 'Please authenticate to access your notes',
-        biometricOnly: true,
-      );
-      if (!authenticated) {
-        throw Exception('Authentication failed');
-      }
-    } catch (e) {
-      throw Exception('Error during authentication: $e');
-    }
+  static void openBiometricSettings() {
+    AppSettings.openAppSettings(type: AppSettingsType.security);
+  }
+
+  static Future<bool> authenticate() async {
+    return await auth.authenticate(
+      localizedReason: 'Please authenticate to access your notes',
+      biometricOnly: true,
+    );
   }
 
   static Future<BiometricAvailability> biometricAvailability() async {
