@@ -3,5 +3,6 @@ class AppRoutes {
   static const String pinSetup = '/pin-setup';
   static const String home = '/home';
   static const String appLock = '/app-lock';
+  static const String addNote = '/add-note';
   // Add more routes as needed
 }

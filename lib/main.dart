@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_vault/core/routing/app_router.dart';
+import 'package:notes_vault/database/isar.dart';
 import 'package:notes_vault/security/app_lifecycle_observer.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await IsarDb.init();
   runApp(const ProviderScope(child: MainApp()));
 }
 
