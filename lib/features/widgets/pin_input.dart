@@ -20,6 +20,15 @@ class PinInput extends StatefulWidget {
 class _PinInputState extends State<PinInput> {
   final controllers = List.generate(4, (index) => TextEditingController());
   final focusNodes = List.generate(4, (index) => FocusNode());
+  @override
+  void initState() {
+    super.initState();
+
+    // Wait until widget is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      focusNodes[0].requestFocus();
+    });
+  }
 
   String getPin() => controllers.map((c) => c.text).join();
 
@@ -67,7 +76,7 @@ class _PinInputState extends State<PinInput> {
         },
         inputFormatters: [
           LengthLimitingTextInputFormatter(1),
-          FilteringTextInputFormatter.digitsOnly, 
+          FilteringTextInputFormatter.digitsOnly,
         ],
         decoration: const InputDecoration(
           counterText: '',
