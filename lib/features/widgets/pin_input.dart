@@ -18,61 +18,71 @@ class PinInput extends StatefulWidget {
 }
 
 class _PinInputState extends State<PinInput> {
-  final controllers = List.generate(4, (index) => TextEditingController());
-  final focusNodes = List.generate(4, (index) => FocusNode());
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+  bool _hasSubmitted = false;
 
   @override
   void initState() {
     super.initState();
+    _controller.addListener(_onTextChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      focusNodes[0].requestFocus();
+      _focusNode.requestFocus();
     });
   }
 
   @override
   void dispose() {
-    for (final controller in controllers) {
-      controller.dispose();
-    }
-    for (final node in focusNodes) {
-      node.dispose();
-    }
+    _controller.removeListener(_onTextChanged);
+    _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  String getPin() => controllers.map((c) => c.text).join();
+  void _onTextChanged() {
+    final text = _controller.text;
+    setState(() {}); // Rebuild to update visual boxes
 
-  Widget buildBox(int index) {
-    return SizedBox(
+    if (text.length == 4 && !_hasSubmitted) {
+      _hasSubmitted = true;
+      // Unfocus to dismiss keyboard, then notify
+      _focusNode.unfocus();
+      widget.onPinComplete(text);
+    } else if (text.length < 4) {
+      _hasSubmitted = false;
+    }
+  }
+
+  Widget _buildBox(int index) {
+    final text = _controller.text;
+    final isFilled = index < text.length;
+    final isActive = index == text.length && _focusNode.hasFocus;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
       width: 50,
-      child: TextField(
-        enabled: widget.enabled,
-        controller: controllers[index],
-        focusNode: focusNodes[index],
-        keyboardType: TextInputType.number,
-        obscureText: widget.obscurePin,
-        textAlign: TextAlign.center,
-        maxLength: 1,
-        onChanged: (value) {
-          if (value.isEmpty && index > 0) {
-            focusNodes[index - 1].requestFocus();
-          } else if (value.isNotEmpty && index < 3) {
-            focusNodes[index + 1].requestFocus();
-          }
-
-          if (getPin().length == 4) {
-            widget.onPinComplete(getPin());
-          }
-        },
-        inputFormatters: [
-          LengthLimitingTextInputFormatter(1),
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        decoration: const InputDecoration(
-          counterText: '',
-          border: OutlineInputBorder(),
+      height: 55,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : isFilled
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
+              : Theme.of(context).colorScheme.outline,
+          width: isActive ? 2.0 : 1.0,
         ),
+        borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
+      child: isFilled
+          ? Text(
+              widget.obscurePin ? '•' : text[index],
+              style: TextStyle(
+                fontSize: widget.obscurePin ? 28 : 22,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          : null,
     );
   }
 
@@ -80,10 +90,49 @@ class _PinInputState extends State<PinInput> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 10,
-          children: List.generate(4, (index) => buildBox(index)),
+        GestureDetector(
+          onTap: widget.enabled ? () => _focusNode.requestFocus() : null,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Hidden text field that captures all input
+              Opacity(
+                opacity: 0,
+                child: SizedBox(
+                  height: 1,
+                  child: TextField(
+                    enabled: widget.enabled,
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    autofocus: true,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(4),
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    decoration: const InputDecoration(
+                      counterText: '',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+              // Visual display boxes
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(4, (index) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? 0 : 5,
+                      right: index == 3 ? 0 : 5,
+                    ),
+                    child: _buildBox(index),
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
       ],
