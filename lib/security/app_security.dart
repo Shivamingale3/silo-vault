@@ -20,4 +20,6 @@ class AppSecurity {
     if (storedHash == null) return false;
     return BCrypt.checkpw(inputPin, storedHash);
   }
+
+  static Future<void> disableScreenShot() async {}
 }

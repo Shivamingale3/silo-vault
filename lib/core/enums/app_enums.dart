@@ -6,4 +6,5 @@ enum AppKeys {
   maxUnlockAttempts,
   lockoutTill,
   failedAttempts,
+  autoLockTimeout,
 }

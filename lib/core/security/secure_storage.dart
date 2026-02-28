@@ -72,6 +72,17 @@ class SecureStorage {
     await delete(AppKeys.lockoutTill);
   }
 
+  /// Returns auto-lock timeout in seconds. Default: 0 (immediate).
+  static Future<int> getAutoLockTimeout() async {
+    String? timeout = await read(AppKeys.autoLockTimeout);
+    if (timeout == null) return 0;
+    return int.parse(timeout);
+  }
+
+  static Future<void> setAutoLockTimeout(int seconds) async {
+    await write(AppKeys.autoLockTimeout, seconds.toString());
+  }
+
   static Future<void> write(AppKeys key, String value) async {
     if (key == AppKeys.biometric) throw Exception("Invalid key");
     await _secureStorage.write(key: key.name, value: value);
