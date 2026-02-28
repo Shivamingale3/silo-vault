@@ -1,6 +1,9 @@
-enum AppKeys{
+enum AppKeys {
   appPin,
   accessToken,
   refreshToken,
-  biometric
+  biometric,
+  maxUnlockAttempts,
+  lockoutTill,
+  failedAttempts,
 }

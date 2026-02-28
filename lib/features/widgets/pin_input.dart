@@ -91,7 +91,19 @@ class _PinInputState extends State<PinInput> {
     return Column(
       children: [
         GestureDetector(
-          onTap: widget.enabled ? () => _focusNode.requestFocus() : null,
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.enabled
+              ? () {
+                  if (_focusNode.hasFocus) {
+                    _focusNode.unfocus();
+                    Future.delayed(const Duration(milliseconds: 50), () {
+                      if (mounted) _focusNode.requestFocus();
+                    });
+                  } else {
+                    _focusNode.requestFocus();
+                  }
+                }
+              : null,
           child: Stack(
             alignment: Alignment.center,
             children: [

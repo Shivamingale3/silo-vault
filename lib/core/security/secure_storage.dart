@@ -5,11 +5,6 @@ import 'package:notes_vault/core/enums/app_enums.dart';
 class SecureStorage {
   static const _secureStorage = FlutterSecureStorage();
 
-  static Future<void> write(AppKeys key, String value) async {
-    if (key == AppKeys.biometric) throw Exception("Invalid key");
-    await _secureStorage.write(key: key.name, value: value);
-  }
-
   static Future<void> setBiometricStatus(bool isEnabled) async {
     await _secureStorage.write(
       key: AppKeys.biometric.name,
@@ -22,8 +17,64 @@ class SecureStorage {
     return exists != null && exists == "true";
   }
 
+  static Future<void> setMaxUnlockAttempts(int attempts) async {
+    if (attempts < 3) {
+      throw Exception("Invalid value for maximum failed unlock attempts!");
+    }
+    await _secureStorage.write(
+      key: AppKeys.maxUnlockAttempts.toString(),
+      value: attempts.toString(),
+    );
+  }
+
+  static Future<int> getMaxUnlockAttempts() async {
+    String? maxAttempts = await _secureStorage.read(
+      key: AppKeys.maxUnlockAttempts.toString(),
+    );
+
+    if (maxAttempts == null) return 3;
+    return int.parse(maxAttempts);
+  }
+
   static Future<void> setAppPin(String pin) async {
     await write(AppKeys.appPin, BCrypt.hashpw(pin, BCrypt.gensalt()));
+  }
+
+  static Future<void> setLockoutTill(DateTime till) async {
+    if (till.isBefore(DateTime.now()) ||
+        till.isAtSameMomentAs(DateTime.now())) {
+      throw Exception("Invalid lockout time");
+    }
+
+    await write(AppKeys.lockoutTill, till.toString());
+  }
+
+  static Future<DateTime> isLockedOut() async {
+    String? till = await read(AppKeys.lockoutTill);
+    if (till == null) {
+      return DateTime.now();
+    }
+    return DateTime.parse(till);
+  }
+
+  static Future<int> getFailedAttempts() async {
+    String? attempts = await read(AppKeys.failedAttempts);
+    if (attempts == null) return 0;
+    return int.parse(attempts);
+  }
+
+  static Future<void> setFailedAttempts(int attempts) async {
+    await write(AppKeys.failedAttempts, attempts.toString());
+  }
+
+  static Future<void> clearLockout() async {
+    await delete(AppKeys.failedAttempts);
+    await delete(AppKeys.lockoutTill);
+  }
+
+  static Future<void> write(AppKeys key, String value) async {
+    if (key == AppKeys.biometric) throw Exception("Invalid key");
+    await _secureStorage.write(key: key.name, value: value);
   }
 
   static Future<String?> read(AppKeys key) async {
