@@ -52,6 +52,57 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
     });
   }
 
+  Future<BiometricSetupResult> _attemptBiometricSetup() async {
+    final result = await BiometricAuth.authenticate();
+
+    if (!mounted) return BiometricSetupResult.skipped;
+
+    switch (result) {
+      case BiometricResult.success:
+        await SecureStorage.setBiometricStatus(true);
+        return BiometricSetupResult.success;
+
+      case BiometricResult.cancelled:
+      case BiometricResult.failed:
+        // Show retry/skip dialog and wait for user's choice
+        final shouldRetry = await _showBiometricRetryDialog(
+          result == BiometricResult.cancelled
+              ? "Biometric authentication was cancelled."
+              : "Biometric authentication failed.",
+        );
+
+        if (shouldRetry == true) {
+          return _attemptBiometricSetup(); // Retry
+        } else {
+          await SecureStorage.setBiometricStatus(false);
+          return BiometricSetupResult.skipped;
+        }
+    }
+  }
+
+  Future<bool?> _showBiometricRetryDialog(String message) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("Biometric Setup"),
+        content: Text(
+          "$message\n\nWould you like to try again or skip biometric setup?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Skip"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _savePin() async {
     if (isProcessing) return;
 
@@ -72,36 +123,17 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
           return; // Stop here — user must enroll biometrics first
         }
 
-        try {
-          final authenticated = await BiometricAuth.authenticate();
-          if (authenticated) {
-            await SecureStorage.setBiometricStatus(true);
-            if (!mounted) return;
-            messenger.showSnackBar(
-              const SnackBar(content: Text("Biometric set successfully!")),
-            );
-          } else {
-            // User cancelled biometric — still save PIN but without biometric
-            await SecureStorage.setBiometricStatus(false);
-            if (!mounted) return;
-            messenger.showSnackBar(
-              const SnackBar(
-                content: Text(
-                  "Biometric cancelled. PIN saved without biometric.",
-                ),
-              ),
-            );
-          }
-        } catch (e) {
-          print(
-            "Biometric failed : ==========================================${e.toString()}",
-          );
-          await SecureStorage.setBiometricStatus(false);
-          if (!mounted) return;
+        final setupResult = await _attemptBiometricSetup();
+
+        if (!mounted) return;
+
+        if (setupResult == BiometricSetupResult.success) {
           messenger.showSnackBar(
-            const SnackBar(
-              content: Text("Failed to authenticate using biometric"),
-            ),
+            const SnackBar(content: Text("Biometric set successfully!")),
+          );
+        } else {
+          messenger.showSnackBar(
+            const SnackBar(content: Text("PIN saved without biometric.")),
           );
         }
       } else {
@@ -114,9 +146,6 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
       if (!mounted) return;
       appRouter.replace(AppRoutes.appLock);
     } catch (e) {
-       print(
-            "Biometric failed : ==========================================${e.toString()}",
-          );
       if (!mounted) return;
       setState(() {
         isProcessing = false;

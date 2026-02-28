@@ -9,11 +9,25 @@ class BiometricAuth {
     AppSettings.openAppSettings(type: AppSettingsType.security);
   }
 
-  static Future<bool> authenticate() async {
-    return await auth.authenticate(
-      localizedReason: 'Please authenticate to access your notes',
-      biometricOnly: true,
-    );
+  static Future<BiometricResult> authenticate() async {
+    try {
+      final authenticated = await auth.authenticate(
+        localizedReason: 'Please authenticate to access your notes',
+        biometricOnly: true,
+      );
+      return authenticated
+          ? BiometricResult.success
+          : BiometricResult.cancelled;
+    } on LocalAuthException catch (e) {
+      if (e.code == LocalAuthExceptionCode.userCanceled ||
+          e.code == LocalAuthExceptionCode.systemCanceled ||
+          e.code == LocalAuthExceptionCode.userRequestedFallback) {
+        return BiometricResult.cancelled;
+      }
+      return BiometricResult.failed;
+    } catch (e) {
+      return BiometricResult.failed;
+    }
   }
 
   static Future<BiometricAvailability> biometricAvailability() async {
