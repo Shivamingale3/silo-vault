@@ -8,6 +8,6 @@ class IsarDb {
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
     final dir = await getApplicationDocumentsDirectory();
-    isar = await Isar.open([], directory: dir.path, inspector: true);
+    // isar = await Isar.open([], directory: dir.path, inspector: true);
   }
 }
