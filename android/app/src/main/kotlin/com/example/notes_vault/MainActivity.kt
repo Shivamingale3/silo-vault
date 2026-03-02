@@ -1,4 +1,4 @@
-package com.example.notes_vault
+package com.shivamingale.notes_vault
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

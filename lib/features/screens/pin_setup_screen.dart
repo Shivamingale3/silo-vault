@@ -210,9 +210,6 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
             appRouter.pop();
           }
         },
-        onSkipTap: () {
-          // Handle skip logic if allowed
-        },
       ),
     );
   }

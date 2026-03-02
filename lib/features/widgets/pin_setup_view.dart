@@ -15,7 +15,6 @@ class PinSetupView extends StatelessWidget {
   final Function(String) onDigitTap;
   final VoidCallback onBackspaceTap;
   final VoidCallback onBackTap;
-  final VoidCallback onSkipTap;
 
   const PinSetupView({
     super.key,
@@ -29,7 +28,6 @@ class PinSetupView extends StatelessWidget {
     required this.onDigitTap,
     required this.onBackspaceTap,
     required this.onBackTap,
-    required this.onSkipTap,
   });
 
   @override
@@ -80,33 +78,22 @@ class PinSetupView extends StatelessWidget {
           child: Column(
             children: [
               // Top App Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 8.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: onBackTap,
-                    ),
-                    TextButton(
-                      onPressed: onSkipTap,
-                      child: Text(
-                        "Skip",
-                        style: TextStyle(
-                          color: isAmoled
-                              ? Colors.white
-                              : theme.colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
+              if (step == 2)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 8.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: onBackTap,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
               Expanded(
                 child: Padding(
@@ -169,16 +156,15 @@ class PinSetupView extends StatelessWidget {
                       const Spacer(),
 
                       // Biometric Toggle (Only shown on Step 1 per design)
-                      if (step == 1)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 24.0),
-                          child: BiometricToggleCard(
-                            enableBiometric: enableBiometric,
-                            isProcessing: isProcessing,
-                            biometricAvailability: biometricAvailability,
-                            onChanged: onBiometricChanged,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 24.0),
+                        child: BiometricToggleCard(
+                          enableBiometric: enableBiometric,
+                          isProcessing: isProcessing,
+                          biometricAvailability: biometricAvailability,
+                          onChanged: onBiometricChanged,
                         ),
+                      ),
 
                       // Num Pad
                       CustomNumPad(
