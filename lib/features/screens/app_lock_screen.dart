@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/core/enums/security_enums.dart';
 import 'package:notes_vault/core/security/secure_storage.dart';
-import 'package:notes_vault/features/widgets/pin_action_buttons.dart';
-import 'package:notes_vault/features/widgets/pin_input_section.dart';
+import 'package:notes_vault/features/widgets/pin_unlock_view.dart';
+import 'package:notes_vault/features/widgets/security_lockout_view.dart';
 import 'package:notes_vault/security/app_security.dart';
 import 'package:notes_vault/security/biometric_auth.dart';
 
@@ -17,11 +17,10 @@ class AppLockScreen extends StatefulWidget {
 }
 
 class _AppLockScreenState extends State<AppLockScreen> {
+  String pin = '';
   String? errorMessage;
-  bool hidePin = true;
   bool isProcessing = false;
   bool isLockedOut = false;
-  int _pinInputKey = 0;
   int failedAttempts = 0;
   int maxFailedAttempts = 3;
   DateTime? lockoutUntil;
@@ -78,6 +77,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
       isLockedOut = true;
       lockoutUntil = until;
       errorMessage = null;
+      pin = '';
     });
 
     _lockoutTimer?.cancel();
@@ -105,7 +105,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
       lockoutUntil = null;
       failedAttempts = 0;
       errorMessage = null;
-      _pinInputKey++;
+      pin = '';
     });
   }
 
@@ -116,13 +116,14 @@ class _AppLockScreenState extends State<AppLockScreen> {
     _startLockout(until);
   }
 
-  String _formatRemainingTime() {
-    if (lockoutUntil == null) return "";
+  // Pure MM:SS format for the new design
+  String _formatRemainingTimeLocked() {
+    if (lockoutUntil == null) return "00:00";
     final remaining = lockoutUntil!.difference(DateTime.now());
-    if (remaining.isNegative) return "";
-    final minutes = remaining.inMinutes;
-    final seconds = remaining.inSeconds % 60;
-    return "${minutes}m ${seconds.toString().padLeft(2, '0')}s";
+    if (remaining.isNegative) return "00:00";
+    final minutes = remaining.inMinutes.toString().padLeft(2, '0');
+    final seconds = (remaining.inSeconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
   }
 
   Future<void> _attemptBiometric() async {
@@ -137,7 +138,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
       case BiometricResult.cancelled:
       case BiometricResult.failed:
         setState(() {
-          _pinInputKey++;
+          pin = '';
         });
         break;
     }
@@ -177,7 +178,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
             isProcessing = false;
             errorMessage =
                 "Incorrect PIN ($remaining ${remaining == 1 ? 'attempt' : 'attempts'} left)";
-            _pinInputKey++;
+            pin = '';
           });
         }
       }
@@ -186,79 +187,108 @@ class _AppLockScreenState extends State<AppLockScreen> {
       setState(() {
         isProcessing = false;
         errorMessage = "Error verifying PIN";
-        _pinInputKey++;
+        pin = '';
       });
     }
   }
 
+  void _onDigitTap(String digit) {
+    if (isProcessing || isLockedOut) return;
+    setState(() {
+      errorMessage = null;
+      if (pin.length < 4) {
+        pin += digit;
+        if (pin.length == 4) {
+          _verifyPin(pin);
+        }
+      }
+    });
+  }
+
+  void _onBackspaceTap() {
+    if (isProcessing || isLockedOut) return;
+    setState(() {
+      errorMessage = null;
+      if (pin.isNotEmpty) {
+        pin = pin.substring(0, pin.length - 1);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isAmoled = theme.scaffoldBackgroundColor == Colors.black;
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isLockedOut ? Icons.lock : Icons.lock_outline,
-              size: 48,
-              color: isLockedOut ? Colors.red : null,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isLockedOut ? "Too Many Attempts" : "Unlock Notes Vault",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: isLockedOut ? Colors.red : null,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          // Background Blurs mimicking the new design style
+          if (!isLockedOut) ...[
+            Positioned(
+              top: -50,
+              right: -50,
+              child: Container(
+                width: 300,
+                height: 250,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.primary.withValues(
+                    alpha: isAmoled ? 0.15 : 0.08,
+                  ),
+                ),
+                child: BackdropFilter(
+                  filter: ColorFilter.mode(
+                    Colors.transparent,
+                    BlendMode.srcOver,
+                  ),
+                  child: Container(),
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            if (isLockedOut) ...[
-              Text(
-                "Try again in ${_formatRemainingTime()}",
-                style: const TextStyle(fontSize: 16, color: Colors.red),
+            Positioned(
+              top: 150,
+              left: -80,
+              child: Container(
+                width: 250,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.blue.shade900.withValues(
+                    alpha: isAmoled ? 0.2 : 0.1,
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                "Your vault has been temporarily locked\ndue to too many failed attempts.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ] else ...[
-              PinInputSection(
-                key: ValueKey(_pinInputKey),
-                step: 1,
-                enabled: !isProcessing,
-                obscurePin: hidePin,
-                errorMessage: errorMessage,
-                onPinComplete: _verifyPin,
-              ),
-              const SizedBox(height: 20),
-              PinActionButtons(
-                isProcessing: isProcessing,
-                hidePin: hidePin,
-                step: 1,
-                onToggleVisibility: () {
-                  setState(() {
-                    hidePin = !hidePin;
-                  });
-                },
-                onReset: () {},
-              ),
-              const SizedBox(height: 12),
-              TextButton.icon(
-                onPressed: isProcessing ? null : _attemptBiometric,
-                icon: const Icon(Icons.fingerprint),
-                label: const Text("Use Biometric"),
-              ),
-            ],
-            if (isProcessing)
-              const Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: CircularProgressIndicator(),
-              ),
+            ),
           ],
-        ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: isLockedOut
+                        ? SecurityLockoutView(
+                            remainingTime: _formatRemainingTimeLocked(),
+                            onRequestEmergencyRecovery: () {},
+                            onContactSupport: () {},
+                          )
+                        : PinUnlockView(
+                            pin: pin,
+                            errorMessage: errorMessage,
+                            isProcessing: isProcessing,
+                            onDigitTap: _onDigitTap,
+                            onBackspaceTap: _onBackspaceTap,
+                            onBiometricTap: _attemptBiometric,
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

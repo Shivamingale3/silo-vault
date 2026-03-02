@@ -4,9 +4,7 @@ import 'package:notes_vault/core/enums/security_enums.dart';
 import 'package:notes_vault/core/routing/app_router.dart';
 import 'package:notes_vault/core/security/secure_storage.dart';
 import 'package:notes_vault/features/widgets/biometric_dialogs.dart';
-import 'package:notes_vault/features/widgets/biometric_option.dart';
-import 'package:notes_vault/features/widgets/pin_action_buttons.dart';
-import 'package:notes_vault/features/widgets/pin_input_section.dart';
+import 'package:notes_vault/features/widgets/pin_setup_view.dart';
 import 'package:notes_vault/security/biometric_auth.dart';
 
 class PinSetupScreen extends StatefulWidget {
@@ -21,8 +19,6 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
   String confirmPin = '';
   String? errorMessage;
   int step = 1;
-  bool hidePin = true;
-  bool enabled = true;
   bool isProcessing = false;
   bool enableBiometric = false;
   BiometricAvailability biometricAvailability =
@@ -44,21 +40,9 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
     });
   }
 
-  void resetPinSetup() {
-    setState(() {
-      enabled = true;
-      isProcessing = false;
-      pin = '';
-      confirmPin = '';
-      errorMessage = null;
-      step = 1;
-    });
-  }
-
   void _resetProcessingState() {
     setState(() {
       isProcessing = false;
-      enabled = true;
     });
   }
 
@@ -95,7 +79,6 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
 
     setState(() {
       isProcessing = true;
-      enabled = false;
       errorMessage = null;
     });
 
@@ -146,76 +129,90 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
     }
   }
 
-  void _onPinComplete(String value) {
-    if (step == 1) {
-      setState(() {
-        pin = value;
-        step = 2;
-        errorMessage = null;
-      });
-    } else {
-      setState(() {
-        confirmPin = value;
-      });
-
-      if (pin == value) {
-        _savePin();
-      } else {
-        setState(() {
-          errorMessage = "PINs do not match";
-        });
+  void _onDigitTap(String digit) {
+    if (isProcessing) return;
+    setState(() {
+      errorMessage = null;
+      if (step == 1 && pin.length < 4) {
+        pin += digit;
+        if (pin.length == 4) {
+          // Delay briefly to show the 4th filled circle before advancing to step 2
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              setState(() {
+                step = 2;
+              });
+            }
+          });
+        }
+      } else if (step == 2 && confirmPin.length < 4) {
+        confirmPin += digit;
+        if (confirmPin.length == 4) {
+          if (pin == confirmPin) {
+            _savePin();
+          } else {
+            // Error! PIN mismatch.
+            setState(() {
+              errorMessage = "PINs do not match. Try again.";
+              confirmPin = ''; // Reset confirm pin on error
+            });
+          }
+        }
       }
-    }
+    });
+  }
+
+  void _onBackspaceTap() {
+    if (isProcessing) return;
+    setState(() {
+      errorMessage = null;
+      if (step == 1 && pin.isNotEmpty) {
+        pin = pin.substring(0, pin.length - 1);
+      } else if (step == 2) {
+        if (confirmPin.isNotEmpty) {
+          confirmPin = confirmPin.substring(0, confirmPin.length - 1);
+        } else {
+          // Allow backspacing to step 1
+          step = 1;
+          pin = pin.substring(0, pin.length - 1);
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Set up your PIN",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            PinInputSection(
-              step: step,
-              enabled: enabled,
-              obscurePin: hidePin,
-              errorMessage: errorMessage,
-              onPinComplete: _onPinComplete,
-            ),
-            const SizedBox(height: 20),
-            PinActionButtons(
-              isProcessing: isProcessing,
-              hidePin: hidePin,
-              step: step,
-              onToggleVisibility: () {
-                setState(() {
-                  hidePin = !hidePin;
-                });
-              },
-              onReset: resetPinSetup,
-            ),
-            BiometricOption(
-              enableBiometric: enableBiometric,
-              isProcessing: isProcessing,
-              biometricAvailability: biometricAvailability,
-              onChanged: (val) {
-                setState(() {
-                  enableBiometric = val;
-                });
-              },
-            ),
-            if (isProcessing)
-              const Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: CircularProgressIndicator(),
-              ),
-          ],
-        ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: PinSetupView(
+        step: step,
+        pinLength: step == 1 ? pin.length : confirmPin.length,
+        errorMessage: errorMessage,
+        isProcessing: isProcessing,
+        enableBiometric: enableBiometric,
+        biometricAvailability: biometricAvailability,
+        onBiometricChanged: (val) {
+          setState(() {
+            enableBiometric = val;
+          });
+        },
+        onDigitTap: _onDigitTap,
+        onBackspaceTap: _onBackspaceTap,
+        onBackTap: () {
+          if (step == 2) {
+            setState(() {
+              step = 1;
+              confirmPin = '';
+            });
+          } else if (appRouter.canPop()) {
+            appRouter.pop();
+          }
+        },
+        onSkipTap: () {
+          // Handle skip logic if allowed
+        },
       ),
     );
   }
