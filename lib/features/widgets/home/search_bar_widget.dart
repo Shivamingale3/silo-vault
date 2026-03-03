@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatelessWidget {
-  const SearchBarWidget({super.key});
+  final ValueChanged<String>? onChanged;
+  final String hintText;
+
+  const SearchBarWidget({
+    super.key,
+    this.onChanged,
+    this.hintText = 'Search your vault...',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +24,9 @@ class SearchBarWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: TextField(
+        onChanged: onChanged,
         decoration: InputDecoration(
-          hintText: 'Search your vault...',
+          hintText: hintText,
           hintStyle: TextStyle(
             color: isDark ? Colors.white54 : Colors.black54,
             fontSize: 14,

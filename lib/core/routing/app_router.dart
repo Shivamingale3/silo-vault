@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:notes_vault/constants/app_routes.dart';
-import 'package:notes_vault/features/models/home_models.dart';
 import 'package:notes_vault/features/screens/add_note_screen.dart';
 import 'package:notes_vault/features/screens/app_lock_screen.dart';
 import 'package:notes_vault/features/screens/error_screen.dart';

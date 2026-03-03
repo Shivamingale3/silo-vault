@@ -1,11 +1,40 @@
 import 'package:flutter/material.dart';
-import '../../models/home_models.dart';
+import '../../models/vault_item.dart';
 
-class FavoritesList extends StatelessWidget {
-  const FavoritesList({super.key});
+class FavoritesList extends StatefulWidget {
+  final List<VaultItem> favorites;
+  final ValueChanged<VaultItem> onCopy;
+  final ValueChanged<VaultItem> onToggleFavorite;
+
+  const FavoritesList({
+    super.key,
+    required this.favorites,
+    required this.onCopy,
+    required this.onToggleFavorite,
+  });
+
+  @override
+  State<FavoritesList> createState() => _FavoritesListState();
+}
+
+class _FavoritesListState extends State<FavoritesList> {
+  /// Tracks which favorite card's password is currently revealed.
+  final Set<String> _revealedIds = {};
+
+  void _toggleReveal(String id) {
+    setState(() {
+      if (_revealedIds.contains(id)) {
+        _revealedIds.remove(id);
+      } else {
+        _revealedIds.add(id);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.favorites.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,12 +57,9 @@ class FavoritesList extends StatelessWidget {
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             scrollDirection: Axis.horizontal,
-            itemCount: HomeSampleData.favorites.length,
+            itemCount: widget.favorites.length,
             itemBuilder: (context, index) {
-              return _buildFavoriteCard(
-                context,
-                HomeSampleData.favorites[index],
-              );
+              return _buildFavoriteCard(context, widget.favorites[index]);
             },
           ),
         ),
@@ -41,9 +67,15 @@ class FavoritesList extends StatelessWidget {
     );
   }
 
-  Widget _buildFavoriteCard(BuildContext context, FavoriteItem item) {
+  Widget _buildFavoriteCard(BuildContext context, VaultItem item) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isRevealed = _revealedIds.contains(item.id);
+
+    // For passwords show masked/revealed, for notes show content preview.
+    final displayValue = item.isPassword
+        ? (isRevealed ? (item.password ?? '') : '••••••••')
+        : (item.displaySubtitle);
 
     return Container(
       width: 240,
@@ -82,7 +114,7 @@ class FavoritesList extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.subtitle,
+                      item.displaySubtitle,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -94,12 +126,16 @@ class FavoritesList extends StatelessWidget {
                   ],
                 ),
               ),
-              if (item.isStarred)
-                Icon(
-                  Icons.star,
+              GestureDetector(
+                onTap: () => widget.onToggleFavorite(item),
+                child: Icon(
+                  item.isFavorite ? Icons.star : Icons.star_border,
                   size: 18,
-                  color: isDark ? Colors.white54 : Colors.black54,
+                  color: item.isFavorite
+                      ? Colors.amber
+                      : (isDark ? Colors.white54 : Colors.black54),
                 ),
+              ),
             ],
           ),
           Container(
@@ -116,27 +152,41 @@ class FavoritesList extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  item.password,
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 14,
-                    letterSpacing: 2,
-                    color: isDark ? Colors.white54 : Colors.black54,
+                Expanded(
+                  child: Text(
+                    displayValue,
+                    style: TextStyle(
+                      fontFamily: item.isPassword ? 'monospace' : null,
+                      fontSize: 14,
+                      letterSpacing: item.isPassword ? 2 : 0,
+                      color: isDark ? Colors.white54 : Colors.black54,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.visibility_outlined,
-                      size: 18,
-                      color: isDark ? Colors.white54 : Colors.black54,
-                    ),
+                    if (item.isPassword)
+                      GestureDetector(
+                        onTap: () => _toggleReveal(item.id),
+                        child: Icon(
+                          isRevealed
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          size: 18,
+                          color: isDark ? Colors.white54 : Colors.black54,
+                        ),
+                      ),
                     const SizedBox(width: 8),
-                    Icon(
-                      Icons.content_copy_outlined,
-                      size: 18,
-                      color: isDark ? Colors.white54 : Colors.black54,
+                    GestureDetector(
+                      onTap: () => widget.onCopy(item),
+                      child: Icon(
+                        Icons.content_copy_outlined,
+                        size: 18,
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
                     ),
                   ],
                 ),

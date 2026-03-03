@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-class VaultFilterTabs extends StatefulWidget {
-  const VaultFilterTabs({super.key});
+class VaultFilterTabs extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onFilterChanged;
 
-  @override
-  State<VaultFilterTabs> createState() => _VaultFilterTabsState();
-}
-
-class _VaultFilterTabsState extends State<VaultFilterTabs> {
-  int _selectedIndex = 0;
-  final List<String> _tabs = [
+  static const List<String> tabs = [
     'All',
     'Passwords',
     'Notes',
     'Favorites',
     'Trash',
   ];
+
+  const VaultFilterTabs({
+    super.key,
+    required this.selectedIndex,
+    required this.onFilterChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,16 +27,12 @@ class _VaultFilterTabsState extends State<VaultFilterTabs> {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
-        children: List.generate(_tabs.length, (index) {
-          final isSelected = index == _selectedIndex;
+        children: List.generate(tabs.length, (index) {
+          final isSelected = index == selectedIndex;
           return Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
+              onTap: () => onFilterChanged(index),
               borderRadius: BorderRadius.circular(24),
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -51,7 +48,7 @@ class _VaultFilterTabsState extends State<VaultFilterTabs> {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Text(
-                  _tabs[index],
+                  tabs[index],
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
