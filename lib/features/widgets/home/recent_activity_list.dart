@@ -97,9 +97,9 @@ class RecentActivityList extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (item.isPassword) {
-          context.push(AppRoutes.viewPassword);
+          context.push(AppRoutes.viewPassword, extra: item);
         } else {
-          context.push(AppRoutes.viewNote);
+          context.push(AppRoutes.viewNote, extra: item);
         }
       },
       child: Container(

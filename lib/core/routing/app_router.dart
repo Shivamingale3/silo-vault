@@ -11,6 +11,7 @@ import 'package:notes_vault/features/screens/splash_screen.dart';
 import 'package:notes_vault/features/screens/main_layout_screen.dart';
 import 'package:notes_vault/features/screens/view_note_screen.dart';
 import 'package:notes_vault/features/screens/view_password_screen.dart';
+import 'package:notes_vault/features/models/vault_item.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -36,11 +37,13 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.viewNote,
-      builder: (context, state) => const ViewNoteScreen(),
+      builder: (context, state) =>
+          ViewNoteScreen(item: state.extra as VaultItem),
     ),
     GoRoute(
       path: AppRoutes.viewPassword,
-      builder: (context, state) => const ViewPasswordScreen(),
+      builder: (context, state) =>
+          ViewPasswordScreen(item: state.extra as VaultItem),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

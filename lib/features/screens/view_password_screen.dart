@@ -1,7 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/features/models/vault_item.dart';
 
-class ViewPasswordScreen extends StatelessWidget {
-  const ViewPasswordScreen({super.key});
+class ViewPasswordScreen extends StatefulWidget {
+  final VaultItem item;
+
+  const ViewPasswordScreen({super.key, required this.item});
+
+  @override
+  State<ViewPasswordScreen> createState() => _ViewPasswordScreenState();
+}
+
+class _ViewPasswordScreenState extends State<ViewPasswordScreen> {
+  bool _passwordVisible = false;
+
+  VaultItem get item => widget.item;
+
+  void _copyToClipboard(String value, String label) {
+    Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label copied to clipboard'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Color _strengthColor(PasswordStrength? strength) {
+    switch (strength) {
+      case PasswordStrength.weak:
+        return Colors.red;
+      case PasswordStrength.fair:
+        return Colors.orange;
+      case PasswordStrength.strong:
+        return Colors.blue;
+      case PasswordStrength.veryStrong:
+        return Colors.green;
+      case null:
+        return Colors.grey;
+    }
+  }
+
+  String _strengthLabel(PasswordStrength? strength) {
+    switch (strength) {
+      case PasswordStrength.weak:
+        return 'Password is weak — consider updating';
+      case PasswordStrength.fair:
+        return 'Password is fair — could be stronger';
+      case PasswordStrength.strong:
+        return 'Password is strong & unique';
+      case PasswordStrength.veryStrong:
+        return 'Password is very strong & unique';
+      case null:
+        return 'Password strength unknown';
+    }
+  }
+
+  IconData _strengthIcon(PasswordStrength? strength) {
+    switch (strength) {
+      case PasswordStrength.weak:
+        return Icons.warning_amber;
+      case PasswordStrength.fair:
+        return Icons.info_outline;
+      case PasswordStrength.strong:
+      case PasswordStrength.veryStrong:
+        return Icons.check_circle;
+      case null:
+        return Icons.help_outline;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +89,9 @@ class ViewPasswordScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           splashRadius: 20,
         ),
-        title: const Text(
-          'Github',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title: Text(
+          item.title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -62,8 +132,7 @@ class ViewPasswordScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Icon(
-                    Icons
-                        .account_circle, // Replace with branding / logo widget in future
+                    Icons.account_circle,
                     size: 48,
                     color: isDark ? Colors.white70 : Colors.black87,
                   ),
@@ -71,7 +140,7 @@ class ViewPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Github',
+                item.title,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -79,52 +148,105 @@ class ViewPasswordScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                'github.com',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white54 : Colors.black54,
+              if (item.websiteUrl != null)
+                Text(
+                  Uri.tryParse(item.websiteUrl!)?.host ?? item.websiteUrl!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
                 ),
-              ),
               const SizedBox(height: 40),
 
-              _buildInfoCard(
-                context,
-                label: 'USERNAME',
-                value: 'dev_explorer',
-                trailing: [
-                  _buildActionButton(context, Icons.content_copy, true),
-                ],
-              ),
-              const SizedBox(height: 16),
+              if (item.username != null) ...[
+                _buildInfoCard(
+                  context,
+                  label: 'USERNAME',
+                  value: item.username!,
+                  trailing: [
+                    _buildActionButton(
+                      context,
+                      Icons.content_copy,
+                      true,
+                      onTap: () => _copyToClipboard(item.username!, 'Username'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
 
-              _buildInfoCard(
-                context,
-                label: 'PASSWORD',
-                value: '••••••••••••',
-                isPassword: true,
-                trailing: [
-                  _buildActionButton(context, Icons.visibility, false),
-                  const SizedBox(width: 8),
-                  _buildActionButton(context, Icons.content_copy, true),
-                ],
-              ),
-              const SizedBox(height: 16),
+              if (item.password != null) ...[
+                _buildInfoCard(
+                  context,
+                  label: 'PASSWORD',
+                  value: _passwordVisible ? item.password! : '••••••••••••',
+                  isPassword: !_passwordVisible,
+                  trailing: [
+                    _buildActionButton(
+                      context,
+                      _passwordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      false,
+                      onTap: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildActionButton(
+                      context,
+                      Icons.content_copy,
+                      true,
+                      onTap: () => _copyToClipboard(item.password!, 'Password'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
 
-              _buildInfoCard(
-                context,
-                label: 'WEBSITE URL',
-                value: 'https://github.com/login',
-                isLink: true,
-              ),
-              const SizedBox(height: 16),
+              if (item.websiteUrl != null) ...[
+                _buildInfoCard(
+                  context,
+                  label: 'WEBSITE URL',
+                  value: item.websiteUrl!,
+                  isLink: true,
+                  trailing: [
+                    _buildActionButton(
+                      context,
+                      Icons.content_copy,
+                      true,
+                      onTap: () => _copyToClipboard(item.websiteUrl!, 'URL'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
 
               _buildSecurityInsightCard(context),
 
+              // Tags
+              if (item.tags.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: item.tags.map((tag) {
+                      final label =
+                          tag.name[0].toUpperCase() + tag.name.substring(1);
+                      return _buildTagChip(context, label);
+                    }).toList(),
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 48),
               Text(
-                'Created: Jan 12, 2024 • Updated: 2 mins ago',
+                'Created: ${_formatDate(item.createdAt)} • Updated: ${item.timeAgoUpdated}',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -134,6 +256,44 @@ class ViewPasswordScreen extends StatelessWidget {
               const SizedBox(height: 48),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Widget _buildTagChip(BuildContext context, String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white70 : Colors.black87,
         ),
       ),
     );
@@ -179,14 +339,16 @@ class ViewPasswordScreen extends StatelessWidget {
                 if (isLink)
                   Row(
                     children: [
-                      Text(
-                        value,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.primary,
+                      Flexible(
+                        child: Text(
+                          value,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.primary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(width: 4),
                       Icon(
@@ -220,32 +382,39 @@ class ViewPasswordScreen extends StatelessWidget {
   Widget _buildActionButton(
     BuildContext context,
     IconData icon,
-    bool isPrimary,
-  ) {
+    bool isPrimary, {
+    required VoidCallback onTap,
+  }) {
     var theme = Theme.of(context);
     var isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: isPrimary
-            ? theme.colorScheme.primary.withValues(alpha: 0.1)
-            : (isDark ? Colors.white12 : Colors.black12),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(
-        icon,
-        size: 20,
-        color: isPrimary
-            ? theme.colorScheme.primary
-            : (isDark ? Colors.white70 : Colors.black87),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isPrimary
+              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+              : (isDark ? Colors.white12 : Colors.black12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: isPrimary
+              ? theme.colorScheme.primary
+              : (isDark ? Colors.white70 : Colors.black87),
+        ),
       ),
     );
   }
 
   Widget _buildSecurityInsightCard(BuildContext context) {
     var isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = _strengthColor(item.passwordStrength);
+    final label = _strengthLabel(item.passwordStrength);
+    final icon = _strengthIcon(item.passwordStrength);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -271,15 +440,17 @@ class ViewPasswordScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(
-            children: const [
-              Icon(Icons.check_circle, color: Colors.green, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Password is strong & unique',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.green,
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: color,
+                  ),
                 ),
               ),
             ],

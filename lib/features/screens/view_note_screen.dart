@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/features/models/vault_item.dart';
 
 class ViewNoteScreen extends StatelessWidget {
-  const ViewNoteScreen({super.key});
+  final VaultItem item;
+
+  const ViewNoteScreen({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +26,11 @@ class ViewNoteScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           splashRadius: 20,
         ),
-        title: const Text(
-          'Project Alpha...',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        title: Text(
+          item.title.length > 20
+              ? '${item.title.substring(0, 20)}...'
+              : item.title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
@@ -46,7 +53,7 @@ class ViewNoteScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Project Alpha Roadmap',
+                item.title,
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -65,11 +72,21 @@ class ViewNoteScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Last updated: Feb 15, 2024',
+                    'Last updated: ${item.timeAgoUpdated}',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: isDark ? Colors.white54 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    item.category.name[0].toUpperCase() +
+                        item.category.name.substring(1),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ],
@@ -78,7 +95,16 @@ class ViewNoteScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: item.content ?? ''));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Note copied to clipboard'),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -98,29 +124,50 @@ class ViewNoteScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Phase 1: Security Audit. Our primary focus is completing the comprehensive penetration testing across all cloud environments. All API endpoints must be validated against the new Zero-Trust architecture.\n\nPhase 2: Beta Launch. Scheduled for late Q3. We will invite the first cohort of 500 power users to test the stability of the core ledger components. Detailed infrastructure review completed. All security protocols are now in place for the upcoming quarter.\n\nPhase 3: Public Release. Following the audit and successful beta feedback loops, the global rollout will begin. Final localization for 12 languages is currently underway.',
+                item.content ?? '',
                 style: TextStyle(
                   fontSize: 16,
                   height: 1.6,
                   color: isDark ? Colors.white70 : Colors.black87,
                 ),
               ),
+              if (item.tags.isNotEmpty) ...[
+                const SizedBox(height: 48),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: item.tags.map((tag) {
+                    final label =
+                        tag.name[0].toUpperCase() + tag.name.substring(1);
+                    return _buildTagChip(context, label, _tagColor(tag));
+                  }).toList(),
+                ),
+              ],
               const SizedBox(height: 48),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildTagChip(context, 'Work', Colors.blue),
-                  _buildTagChip(context, 'Urgent', Colors.red),
-                  _buildTagChip(context, 'Internal', Colors.amber),
-                ],
-              ),
-              const SizedBox(height: 48), // Bottom safe space
             ],
           ),
         ),
       ),
     );
+  }
+
+  Color _tagColor(ItemTag tag) {
+    switch (tag) {
+      case ItemTag.urgent:
+        return Colors.red;
+      case ItemTag.important:
+        return Colors.orange;
+      case ItemTag.archived:
+        return Colors.grey;
+      case ItemTag.shared:
+        return Colors.blue;
+      case ItemTag.encrypted:
+        return Colors.green;
+      case ItemTag.temporary:
+        return Colors.amber;
+      case ItemTag.pinned:
+        return Colors.purple;
+    }
   }
 
   Widget _buildTagChip(BuildContext context, String label, Color color) {

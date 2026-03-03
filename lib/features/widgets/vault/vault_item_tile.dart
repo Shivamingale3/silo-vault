@@ -187,9 +187,9 @@ class _VaultItemTileState extends State<VaultItemTile> {
       child: InkWell(
         onTap: () {
           if (item.isPassword) {
-            context.push(AppRoutes.viewPassword);
+            context.push(AppRoutes.viewPassword, extra: item);
           } else {
-            context.push(AppRoutes.viewNote);
+            context.push(AppRoutes.viewNote, extra: item);
           }
         },
         onLongPress: () => _showContextMenu(context),
