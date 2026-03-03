@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:notes_vault/constants/app_routes.dart';
 
 class CustomBottomNav extends StatelessWidget {
-  const CustomBottomNav({super.key});
+  final int currentIndex;
+
+  const CustomBottomNav({super.key, this.currentIndex = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -35,31 +39,36 @@ class CustomBottomNav extends StatelessWidget {
               context,
               icon: Icons.home_filled,
               label: 'Home',
-              isActive: true,
+              isActive: currentIndex == 0,
+              onTap: () => context.go(AppRoutes.home),
             ),
             _buildNavItem(
               context,
               icon: Icons.dataset_outlined,
               label: 'Vault',
-              isActive: false,
+              isActive: currentIndex == 1,
+              onTap: () => context.go(AppRoutes.vault),
             ),
             _buildNavItem(
               context,
               icon: Icons.search,
               label: 'Search',
-              isActive: false,
+              isActive: currentIndex == 2,
+              onTap: () {},
             ),
             _buildNavItem(
               context,
               icon: Icons.token_outlined,
               label: 'Generator',
-              isActive: false,
+              isActive: currentIndex == 3,
+              onTap: () {},
             ),
             _buildNavItem(
               context,
               icon: Icons.settings_outlined,
               label: 'Settings',
-              isActive: false,
+              isActive: currentIndex == 4,
+              onTap: () {},
             ),
           ],
         ),
@@ -72,6 +81,7 @@ class CustomBottomNav extends StatelessWidget {
     required IconData icon,
     required String label,
     required bool isActive,
+    required VoidCallback onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -81,7 +91,7 @@ class CustomBottomNav extends StatelessWidget {
         : (isDark ? Colors.white54 : Colors.black54);
 
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.all(8.0),

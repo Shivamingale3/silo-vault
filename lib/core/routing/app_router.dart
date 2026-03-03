@@ -4,6 +4,7 @@ import 'package:notes_vault/features/screens/add_note_screen.dart';
 import 'package:notes_vault/features/screens/app_lock_screen.dart';
 import 'package:notes_vault/features/screens/error_screen.dart';
 import 'package:notes_vault/features/screens/home_screen.dart';
+import 'package:notes_vault/features/screens/vault_screen.dart';
 import 'package:notes_vault/features/screens/pin_setup_screen.dart';
 import 'package:notes_vault/features/screens/splash_screen.dart';
 
@@ -25,6 +26,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.home,
       builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.vault,
+      builder: (context, state) => const VaultScreen(),
     ),
     GoRoute(
       path: AppRoutes.addNote,
