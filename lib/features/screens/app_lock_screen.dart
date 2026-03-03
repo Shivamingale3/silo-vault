@@ -134,7 +134,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
       case BiometricResult.success:
         await SecureStorage.clearLockout();
         if (!mounted) return;
-        context.go(AppRoutes.home);
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.home);
+        }
       case BiometricResult.cancelled:
       case BiometricResult.failed:
         setState(() {
@@ -160,7 +164,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
       if (isValid) {
         await SecureStorage.clearLockout();
         if (!mounted) return;
-        context.go(AppRoutes.home);
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.home);
+        }
       } else {
         failedAttempts++;
         await SecureStorage.setFailedAttempts(failedAttempts);

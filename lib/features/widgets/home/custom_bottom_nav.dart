@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:notes_vault/constants/app_routes.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
+  final ValueChanged<int>? onTap;
 
-  const CustomBottomNav({super.key, this.currentIndex = 0});
+  const CustomBottomNav({super.key, this.currentIndex = 0, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -40,35 +39,35 @@ class CustomBottomNav extends StatelessWidget {
               icon: Icons.home_filled,
               label: 'Home',
               isActive: currentIndex == 0,
-              onTap: () => context.go(AppRoutes.home),
+              onTap: () => onTap?.call(0),
             ),
             _buildNavItem(
               context,
               icon: Icons.dataset_outlined,
               label: 'Vault',
               isActive: currentIndex == 1,
-              onTap: () => context.go(AppRoutes.vault),
+              onTap: () => onTap?.call(1),
             ),
             _buildNavItem(
               context,
               icon: Icons.search,
               label: 'Search',
               isActive: currentIndex == 2,
-              onTap: () {},
+              onTap: () => onTap?.call(2),
             ),
             _buildNavItem(
               context,
               icon: Icons.token_outlined,
               label: 'Generator',
               isActive: currentIndex == 3,
-              onTap: () {},
+              onTap: () => onTap?.call(3),
             ),
             _buildNavItem(
               context,
               icon: Icons.settings_outlined,
               label: 'Settings',
               isActive: currentIndex == 4,
-              onTap: () {},
+              onTap: () => onTap?.call(4),
             ),
           ],
         ),

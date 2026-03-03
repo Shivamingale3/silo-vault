@@ -45,7 +45,7 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
     final elapsed = DateTime.now().difference(pausedAt).inSeconds;
 
     if (elapsed >= timeoutSeconds) {
-      appRouter.go(AppRoutes.appLock);
+      appRouter.push(AppRoutes.appLock);
     }
   }
 }
