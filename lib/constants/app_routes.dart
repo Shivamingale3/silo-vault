@@ -5,5 +5,6 @@ class AppRoutes {
   static const String vault = '/vault';
   static const String appLock = '/app-lock';
   static const String addNote = '/add-note';
-  // Add more routes as needed
+  static const String viewNote = '/view-note';
+  static const String viewPassword = '/view-password';
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/home_models.dart';
+import 'package:go_router/go_router.dart';
 
 class RecentActivityList extends StatelessWidget {
   const RecentActivityList({super.key});
@@ -81,73 +82,82 @@ class RecentActivityList extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(isLast ? 0 : 16).copyWith(
-          topLeft: index == 0 ? const Radius.circular(16) : Radius.zero,
-          topRight: index == 0 ? const Radius.circular(16) : Radius.zero,
-          bottomLeft: isLast ? const Radius.circular(16) : Radius.zero,
-          bottomRight: isLast ? const Radius.circular(16) : Radius.zero,
+    return InkWell(
+      onTap: () {
+        if (item.type == 'Password') {
+          context.push('/view-password');
+        } else {
+          context.push('/view-note');
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(isLast ? 0 : 16).copyWith(
+            topLeft: index == 0 ? const Radius.circular(16) : Radius.zero,
+            topRight: index == 0 ? const Radius.circular(16) : Radius.zero,
+            bottomLeft: isLast ? const Radius.circular(16) : Radius.zero,
+            bottomRight: isLast ? const Radius.circular(16) : Radius.zero,
+          ),
+          border: isLast
+              ? null
+              : Border(
+                  bottom: BorderSide(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
+                  ),
+                ),
         ),
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.05),
-                ),
-              ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.black : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  item.icon,
-                  size: 16,
-                  color: isDark ? Colors.white54 : Colors.black54,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.black : Colors.white,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  Text(
-                    item.subtitle,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white54 : Colors.black54,
-                    ),
+                  child: Icon(
+                    item.icon,
+                    size: 16,
+                    color: isDark ? Colors.white54 : Colors.black54,
                   ),
-                ],
-              ),
-            ],
-          ),
-          Icon(
-            Icons.content_copy_outlined,
-            color: colorScheme.primary,
-            size: 20,
-          ),
-        ],
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      item.subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Icon(
+              Icons.content_copy_outlined,
+              color: colorScheme.primary,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

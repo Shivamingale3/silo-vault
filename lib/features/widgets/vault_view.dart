@@ -22,6 +22,7 @@ class VaultView extends StatelessWidget {
           const SearchBarWidget(),
           const SizedBox(height: 8),
           VaultItemTile(
+            type: 'Password',
             title: 'Adobe Creative Cloud',
             subtitle: 'design@studio.com',
             iconData: Icons.password,
@@ -31,6 +32,7 @@ class VaultView extends StatelessWidget {
             showCopy: true,
           ),
           VaultItemTile(
+            type: 'Note',
             title: 'Grocery List',
             subtitle: 'Milk, Eggs, Bread...',
             iconData: Icons.description,
@@ -39,6 +41,7 @@ class VaultView extends StatelessWidget {
             isStarred: true,
           ),
           VaultItemTile(
+            type: 'Password',
             title: 'GitHub',
             subtitle: 'dev_user',
             iconData: Icons.password,
@@ -48,6 +51,7 @@ class VaultView extends StatelessWidget {
             showCopy: true,
           ),
           VaultItemTile(
+            type: 'Password',
             title: 'Steam Account',
             subtitle: 'gamer_pro_99',
             iconData: Icons.key,
