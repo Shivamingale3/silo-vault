@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class HomeHeader extends StatelessWidget {
+class CommonHeader extends StatelessWidget {
   final String title;
   final Widget? leading;
   final List<Widget>? actions;
 
-  const HomeHeader({
+  const CommonHeader({
     super.key,
     this.title = 'Notes Vault',
     this.leading,
