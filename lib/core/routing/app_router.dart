@@ -83,15 +83,7 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/search',
-              builder: (context, state) =>
-                  const Scaffold(body: Center(child: Text('Search'))),
-            ),
-          ],
-        ),
+
         StatefulShellBranch(
           routes: [
             GoRoute(

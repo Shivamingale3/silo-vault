@@ -42,12 +42,9 @@ class MainLayoutScreen extends StatelessWidget {
         ];
         break;
       case 2:
-        title = 'Search';
-        break;
-      case 3:
         title = 'Generator';
         break;
-      case 4:
+      case 3:
         title = 'Settings';
         break;
       case 0:
