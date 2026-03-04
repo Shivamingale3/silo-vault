@@ -15,6 +15,7 @@ import 'package:notes_vault/features/screens/add_password_screen.dart';
 import 'package:notes_vault/features/screens/edit_note_screen.dart';
 import 'package:notes_vault/features/screens/edit_password_screen.dart';
 import 'package:notes_vault/features/screens/password_generator_screen.dart';
+import 'package:notes_vault/features/screens/settings_screen.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -97,8 +98,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/settings',
-              builder: (context, state) =>
-                  const Scaffold(body: Center(child: Text('Settings'))),
+              builder: (context, state) => const SettingsScreen(),
             ),
           ],
         ),
