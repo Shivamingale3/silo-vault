@@ -1,23 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_vault/core/enums/app_enums.dart';
+import 'package:notes_vault/core/security/secure_storage.dart';
 
 class ThemeNotifier extends Notifier<AppThemeMode> {
+  final AppThemeMode _initialTheme;
+
+  ThemeNotifier([this._initialTheme = AppThemeMode.dark]);
+
   @override
   AppThemeMode build() {
-    return AppThemeMode.dark; // Defaulting to dark
+    return _initialTheme;
   }
 
   void setTheme(AppThemeMode mode) {
     state = mode;
+    SecureStorage.setAppTheme(mode.name);
   }
 
   void toggleTheme() {
     if (state == AppThemeMode.light) {
-      state = AppThemeMode.dark;
+      setTheme(AppThemeMode.dark);
     } else if (state == AppThemeMode.dark) {
-      state = AppThemeMode.amoled;
+      setTheme(AppThemeMode.amoled);
     } else {
-      state = AppThemeMode.light;
+      setTheme(AppThemeMode.light);
     }
   }
 }

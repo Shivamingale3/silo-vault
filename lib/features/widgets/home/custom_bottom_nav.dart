@@ -82,26 +82,28 @@ class CustomBottomNav extends StatelessWidget {
         ? colorScheme.primary
         : (isDark ? Colors.white54 : Colors.black54);
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
-                color: color,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(height: 4),
+              Text(
+                label.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  color: color,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

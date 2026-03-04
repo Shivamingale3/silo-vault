@@ -6,11 +6,26 @@ import 'package:notes_vault/core/theme/app_theme.dart';
 import 'package:notes_vault/core/theme/theme_provider.dart';
 import 'package:notes_vault/database/isar.dart';
 import 'package:notes_vault/security/app_lifecycle_observer.dart';
+import 'package:notes_vault/core/security/secure_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await IsarDb.init();
-  runApp(const ProviderScope(child: MainApp()));
+
+  final initialThemeStr = await SecureStorage.getAppTheme();
+  final initialTheme = AppThemeMode.values.firstWhere(
+    (e) => e.name == initialThemeStr,
+    orElse: () => AppThemeMode.dark,
+  );
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        themeProvider.overrideWith(() => ThemeNotifier(initialTheme)),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends ConsumerStatefulWidget {

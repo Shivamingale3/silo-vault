@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_vault/core/enums/app_enums.dart';
+import 'package:notes_vault/core/theme/theme_provider.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
-  String _activeAppearance = 'AMOLED';
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _biometricUnlock = true;
   bool _syncToCloud = false;
 
@@ -156,9 +158,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.all(4),
           child: Row(
             children: [
-              _buildAppearanceButton('Light', primaryColor),
-              _buildAppearanceButton('Dark', primaryColor),
-              _buildAppearanceButton('AMOLED', primaryColor),
+              _buildAppearanceButton('Light', AppThemeMode.light, primaryColor),
+              _buildAppearanceButton('Dark', AppThemeMode.dark, primaryColor),
+              _buildAppearanceButton(
+                'AMOLED',
+                AppThemeMode.amoled,
+                primaryColor,
+              ),
             ],
           ),
         ),
@@ -166,14 +172,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAppearanceButton(String label, Color primaryColor) {
-    final isActive = _activeAppearance == label;
+  Widget _buildAppearanceButton(
+    String label,
+    AppThemeMode mode,
+    Color primaryColor,
+  ) {
+    final activeMode = ref.watch(themeProvider);
+    final isActive = activeMode == mode;
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            _activeAppearance = label;
-          });
+          ref.read(themeProvider.notifier).setTheme(mode);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),

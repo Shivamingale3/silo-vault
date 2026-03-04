@@ -8,6 +8,7 @@ enum AppKeys {
   failedAttempts,
   autoLockTimeout,
   encryptionKey,
+  appTheme,
 }
 
 enum AppThemeMode { light, dark, amoled }

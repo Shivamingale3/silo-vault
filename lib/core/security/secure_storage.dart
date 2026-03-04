@@ -83,6 +83,14 @@ class SecureStorage {
     await write(AppKeys.autoLockTimeout, seconds.toString());
   }
 
+  static Future<String?> getAppTheme() async {
+    return await read(AppKeys.appTheme);
+  }
+
+  static Future<void> setAppTheme(String theme) async {
+    await write(AppKeys.appTheme, theme);
+  }
+
   static Future<void> write(AppKeys key, String value) async {
     if (key == AppKeys.biometric) throw Exception("Invalid key");
     await _secureStorage.write(key: key.name, value: value);
