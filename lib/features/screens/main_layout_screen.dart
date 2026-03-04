@@ -61,7 +61,7 @@ class MainLayoutScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        extendBody: true,
+        extendBody: false,
         body: SafeArea(
           bottom: false,
           child: Column(

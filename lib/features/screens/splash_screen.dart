@@ -74,14 +74,16 @@ class _SplashScreenState extends State<SplashScreen>
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Colors.black, // Dark background as requested
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // Dark background as requested
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SizedBox(height: 24), // Top spacer
+              SizedBox(height: 24), // Top spacer
               // Central Logo and Identity Section
               Column(
                 children: [
@@ -109,39 +111,43 @@ class _SplashScreenState extends State<SplashScreen>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.blueGrey.shade900,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainer,
                             width: 1,
                           ),
-                          color: Colors.blueGrey.shade900.withValues(
-                            alpha: 0.2,
-                          ),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainer.withValues(alpha: 0.2),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.security, // or shield, lock_outline
                           size: 64,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
-                  const Text(
+                  SizedBox(height: 32),
+                  Text(
                     "VAULT",
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w300,
                       letterSpacing: 8,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     "SECURED ENVIRONMENT",
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 3,
-                      color: Colors.blueGrey.shade400,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -163,7 +169,9 @@ class _SplashScreenState extends State<SplashScreen>
                               "Initializing secure modules...",
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.blueGrey.shade400,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                             AnimatedBuilder(
@@ -173,17 +181,19 @@ class _SplashScreenState extends State<SplashScreen>
                                     (_progressAnimation.value * 100).toInt();
                                 return Text(
                                   "$percentage%",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'monospace',
                                     fontSize: 11,
-                                    color: Colors.white,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                   ),
                                 );
                               },
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         // Linear Progress
                         AnimatedBuilder(
                           animation: _progressAnimation,
@@ -193,9 +203,11 @@ class _SplashScreenState extends State<SplashScreen>
                               child: LinearProgressIndicator(
                                 value: _progressAnimation.value,
                                 minHeight: 4,
-                                backgroundColor: Colors.blueGrey.shade900,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainer,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             );
@@ -205,7 +217,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 48),
+                  SizedBox(height: 48),
 
                   // Circular Loader and Text
                   Column(
@@ -215,23 +227,27 @@ class _SplashScreenState extends State<SplashScreen>
                         height: 32,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          color: Theme.of(context).colorScheme.onSurface,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.1),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.verified_user, size: 14, color: primary),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(
                             "AES-256 BIT ENCRYPTION ACTIVE",
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
-                              color: Colors.blueGrey.shade400,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -248,15 +264,19 @@ class _SplashScreenState extends State<SplashScreen>
                   Icon(
                     Icons.fingerprint,
                     size: 18,
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     "BIOMETRIC READY",
                     style: TextStyle(
                       fontSize: 10,
                       letterSpacing: 2,
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.3),
                     ),
                   ),
                 ],

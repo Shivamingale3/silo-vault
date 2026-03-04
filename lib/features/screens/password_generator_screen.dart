@@ -134,12 +134,12 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(
-      0xFF1152d4,
-    ); // Hardcoded matching design primary
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Colors.black, // Dark mode forces background-dark
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // Dark mode forces background-dark
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -153,11 +153,11 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildPasswordDisplayBox(primaryColor),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 _buildStrengthSection(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
                 _buildLengthControl(),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 _buildOptionsList(primaryColor),
               ],
             ),
@@ -175,30 +175,32 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFF121212),
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         children: [
           Text(
             _password.isEmpty ? 'N/A' : _password.split('').join(' '),
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 20,
               letterSpacing: 2.0,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton.icon(
                 onPressed: _copyPassword,
-                icon: const Icon(Icons.copy, size: 16),
-                label: const Text(
+                icon: Icon(Icons.copy, size: 16),
+                label: Text(
                   'Copy',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
@@ -217,17 +219,19 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               TextButton.icon(
                 onPressed: _generatePassword,
-                icon: const Icon(Icons.refresh, size: 16),
-                label: const Text(
+                icon: Icon(Icons.refresh, size: 16),
+                label: Text(
                   'Regenerate',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xFF1e293b),
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.1),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -250,12 +254,14 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'STRENGTH',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Colors.white54,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.54),
                 letterSpacing: 1.5,
               ),
             ),
@@ -270,7 +276,7 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Row(
           children: List.generate(5, (index) {
             final filledBlocks = (_strengthScore * 5).ceil();
@@ -280,7 +286,11 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
                 margin: EdgeInsets.only(right: index == 4 ? 0 : 4),
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isFilled ? _strengthColor : Colors.white12,
+                  color: isFilled
+                      ? _strengthColor
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -295,12 +305,14 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Password Length',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Colors.white70,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         Row(
@@ -312,12 +324,20 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
                   _generatePassword();
                 }
               },
-              icon: const Icon(Icons.remove, color: Colors.white, size: 20),
+              icon: Icon(
+                Icons.remove,
+                color: Theme.of(context).colorScheme.onSurface,
+                size: 20,
+              ),
               style: IconButton.styleFrom(
-                backgroundColor: const Color(0xFF121212),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                  side: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
                 ),
                 padding: const EdgeInsets.all(8),
               ),
@@ -328,17 +348,21 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
               alignment: Alignment.center,
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF121212),
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.1),
+                ),
               ),
               child: Text(
                 '$_length',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'monospace',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -349,12 +373,20 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
                   _generatePassword();
                 }
               },
-              icon: const Icon(Icons.add, color: Colors.white, size: 20),
+              icon: Icon(
+                Icons.add,
+                color: Theme.of(context).colorScheme.onSurface,
+                size: 20,
+              ),
               style: IconButton.styleFrom(
-                backgroundColor: const Color(0xFF121212),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                  side: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
                 ),
                 padding: const EdgeInsets.all(8),
               ),
@@ -406,7 +438,11 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          bottom: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
         ),
       ),
       child: Row(
@@ -414,15 +450,22 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 14, color: Colors.white70),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: Colors.white,
+            activeThumbColor: Theme.of(context).colorScheme.onSurface,
             activeTrackColor: activeColor,
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: Colors.white12,
+            inactiveThumbColor: Theme.of(context).colorScheme.onSurface,
+            inactiveTrackColor: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.12),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -434,23 +477,27 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.black,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          top: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
         ),
       ),
       child: ElevatedButton(
         onPressed: _copyPassword, // Could be changed to insert elsewhere
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 0,
         ),
-        child: const Text(
+        child: Text(
           'Use This Password',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),

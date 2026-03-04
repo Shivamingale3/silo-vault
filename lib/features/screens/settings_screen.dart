@@ -16,15 +16,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF1152d4);
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            _buildHeader(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(
@@ -37,11 +36,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildProfileSection(primaryColor),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     _buildAppearanceSection(primaryColor),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     _buildSecuritySection(primaryColor),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     _buildDataAndAboutSection(primaryColor),
                   ],
                 ),
@@ -53,46 +52,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Settings',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              letterSpacing: -0.5,
-            ),
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: const Color(0xFF121212),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.lock, color: Colors.white, size: 20),
-              onPressed: () {},
-              splashRadius: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildProfileSection(Color primaryColor) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121212),
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.05),
+        ),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -109,8 +78,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Icon(Icons.account_circle, color: primaryColor, size: 32),
             ),
           ),
-          const SizedBox(width: 16),
-          const Column(
+          SizedBox(width: 16),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -118,13 +87,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 2),
               Text(
                 'Local Vault',
-                style: TextStyle(fontSize: 12, color: Colors.white54),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.54),
+                ),
               ),
             ],
           ),
@@ -137,7 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(left: 8, bottom: 8),
           child: Text(
             'APPEARANCE',
@@ -145,15 +119,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
-              color: Colors.white54,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.54),
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF121212),
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.05),
+            ),
           ),
           padding: const EdgeInsets.all(4),
           child: Row(
@@ -205,7 +185,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? Colors.white : Colors.white54,
+              color: isActive
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.54),
             ),
           ),
         ),
@@ -217,7 +201,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(left: 8, bottom: 8),
           child: Text(
             'SECURITY',
@@ -225,23 +209,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
-              color: Colors.white54,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.54),
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF121212),
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.05),
+            ),
           ),
           child: Column(
             children: [
               _buildSettingsActionItem(
                 'Change PIN',
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.chevron_right,
-                  color: Colors.white30,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                   size: 20,
                 ),
               ),
@@ -267,7 +259,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(left: 8, bottom: 8),
           child: Text(
             'DATA & ABOUT',
@@ -275,15 +267,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
-              color: Colors.white54,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.54),
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF121212),
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.05),
+            ),
           ),
           child: Column(
             children: [
@@ -296,18 +294,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildDivider(),
               _buildSettingsActionItem(
                 'Import Data',
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.download,
-                  color: Colors.white30,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                   size: 20,
                 ),
               ),
               _buildDivider(),
               _buildSettingsActionItem(
                 'Export Data',
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.upload,
-                  color: Colors.white30,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                   size: 20,
                 ),
               ),
@@ -341,7 +343,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 15, color: Colors.white),
+              style: TextStyle(
+                fontSize: 15,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             trailing,
           ],
@@ -363,15 +368,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 15, color: Colors.white),
+            style: TextStyle(
+              fontSize: 15,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: Colors.white,
+            activeThumbColor: Theme.of(context).colorScheme.onSurface,
             activeTrackColor: activeColor,
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: Colors.white12,
+            inactiveThumbColor: Theme.of(context).colorScheme.onSurface,
+            inactiveTrackColor: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.12),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -398,7 +408,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 15, color: Colors.white),
+            style: TextStyle(
+              fontSize: 15,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           Text(
             value,
@@ -406,7 +419,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               fontSize: 14,
               fontFamily: isMonospace ? 'monospace' : null,
               fontWeight: isMonospace ? FontWeight.bold : FontWeight.w500,
-              color: valueColor ?? Colors.white54,
+              color:
+                  valueColor ??
+                  Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.54),
               letterSpacing: isMonospace ? -0.5 : 0,
             ),
           ),
@@ -418,7 +435,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildDivider() {
     return Container(
       height: 1,
-      color: Colors.white.withValues(alpha: 0.05),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
       margin: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
