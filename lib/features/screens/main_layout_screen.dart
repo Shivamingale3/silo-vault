@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/features/widgets/home/home_header.dart';
 import 'package:notes_vault/features/widgets/home/custom_bottom_nav.dart';
 
@@ -75,18 +74,6 @@ class MainLayoutScreen extends StatelessWidget {
             ],
           ),
         ),
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 32.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              context.push(AppRoutes.addNote);
-            },
-            elevation: 8,
-            shape: const CircleBorder(),
-            child: const Icon(Icons.add, size: 32),
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         bottomNavigationBar: CustomBottomNav(
           currentIndex: currentIndex,
           onTap: (index) {

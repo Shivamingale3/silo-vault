@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:notes_vault/constants/app_routes.dart';
 
 class QuickActionsGrid extends StatelessWidget {
   const QuickActionsGrid({super.key});
@@ -14,13 +16,17 @@ class QuickActionsGrid extends StatelessWidget {
             context,
             icon: Icons.password,
             label: 'Add Password',
-            onTap: () {},
+            onTap: () {
+              context.push(AppRoutes.addPassword);
+            },
           ),
           _buildActionItem(
             context,
             icon: Icons.edit_note,
             label: 'Add Note',
-            onTap: () {},
+            onTap: () {
+              context.push(AppRoutes.addNote);
+            },
           ),
           _buildActionItem(
             context,

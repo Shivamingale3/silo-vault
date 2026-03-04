@@ -7,4 +7,7 @@ class AppRoutes {
   static const String addNote = '/add-note';
   static const String viewNote = '/view-note';
   static const String viewPassword = '/view-password';
+  static const String addPassword = '/add-password';
+  static const String editNote = '/edit-note';
+  static const String editPassword = '/edit-password';
 }

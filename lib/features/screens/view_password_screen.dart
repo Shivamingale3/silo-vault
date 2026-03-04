@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/core/enums/db_enums.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
 
@@ -96,7 +98,9 @@ class _ViewPasswordScreenState extends State<ViewPasswordScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit, size: 24),
-            onPressed: () {},
+            onPressed: () {
+              context.push(AppRoutes.editPassword, extra: item);
+            },
             splashRadius: 20,
           ),
           IconButton(
