@@ -69,6 +69,10 @@ final appRouter = GoRouter(
       path: AppRoutes.dbViewer,
       builder: (context, state) => const DbViewerScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.passwordGenerator,
+      builder: (context, state) => const PasswordGeneratorScreen(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainLayoutScreen(navigationShell: navigationShell);

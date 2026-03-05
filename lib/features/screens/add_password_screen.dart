@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/core/enums/db_enums.dart';
 import 'package:notes_vault/core/providers/vault_provider.dart';
 import 'package:notes_vault/core/utils/password_utils.dart';
@@ -317,7 +318,15 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                 ),
               ),
               TextButton.icon(
-                onPressed: () {},
+                onPressed: () async {
+                  final result = await context.push<String>(
+                    AppRoutes.passwordGenerator,
+                  );
+                  if (result != null && result.isNotEmpty) {
+                    _passwordController.text = result;
+                    setState(() {});
+                  }
+                },
                 icon: Icon(
                   Icons.refresh,
                   size: 14,

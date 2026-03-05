@@ -487,7 +487,10 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
         ),
       ),
       child: ElevatedButton(
-        onPressed: _copyPassword, // Could be changed to insert elsewhere
+        onPressed: () {
+          _copyPassword();
+          Navigator.of(context).pop(_password);
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Theme.of(context).colorScheme.onSurface,

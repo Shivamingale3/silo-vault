@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/core/enums/app_enums.dart';
 import 'package:notes_vault/core/providers/dev_mode_provider.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
+import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:notes_vault/core/services/data_transfer_service.dart';
 import 'package:notes_vault/core/theme/theme_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -14,9 +17,117 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _biometricUnlock = true;
+  bool _biometricUnlock = false;
   bool _syncToCloud = false;
   int _versionClickCount = 0;
+  int _autoLockSeconds = 60;
+  int _maxAttempts = 5;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final bio = await SecureStorage.getBiometricStatus();
+    final lock = await SecureStorage.getAutoLockTimeout();
+    final attempts = await SecureStorage.getMaxUnlockAttempts();
+    if (!mounted) return;
+    setState(() {
+      _biometricUnlock = bio;
+      _autoLockSeconds = lock;
+      _maxAttempts = attempts;
+      _loaded = true;
+    });
+  }
+
+  String _autoLockLabel(int seconds) {
+    if (seconds == 0) return 'Immediately';
+    if (seconds < 60) return '$seconds seconds';
+    if (seconds == 60) return '1 minute';
+    if (seconds == 300) return '5 minutes';
+    if (seconds == 600) return '10 minutes';
+    if (seconds == 1800) return '30 minutes';
+    return '${seconds ~/ 60} minutes';
+  }
+
+  void _showAutoLockPicker() {
+    final options = [0, 30, 60, 300, 600, 1800];
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Auto Lock After',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ...options.map(
+              (s) => ListTile(
+                title: Text(_autoLockLabel(s)),
+                trailing: s == _autoLockSeconds
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await SecureStorage.setAutoLockTimeout(s);
+                  setState(() => _autoLockSeconds = s);
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMaxAttemptsPicker() {
+    final options = [3, 5, 7, 10];
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Max Failed Attempts',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ...options.map(
+              (a) => ListTile(
+                title: Text('$a attempts'),
+                trailing: a == _maxAttempts
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await SecureStorage.setMaxUnlockAttempts(a);
+                  setState(() => _maxAttempts = a);
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,28 +199,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'John Doe',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'My Vault',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              SizedBox(height: 2),
-              Text(
-                'Local Vault',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.54),
+                SizedBox(height: 2),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final stats = ref.watch(vaultStatsProvider);
+                    return Text(
+                      '${stats.passwordCount} passwords · ${stats.noteCount} notes',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.54),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -241,6 +359,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _buildSettingsActionItem(
                   'Change PIN',
+                  onTap: () => context.push(AppRoutes.pinSetup),
                   trailing: Icon(
                     Icons.chevron_right,
                     color: Theme.of(
@@ -250,16 +369,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 _buildDivider(),
-                _buildSettingsToggleItem(
-                  'Biometric Unlock',
-                  _biometricUnlock,
-                  (val) => setState(() => _biometricUnlock = val),
-                  primaryColor,
+                _buildSettingsToggleItem('Biometric Unlock', _biometricUnlock, (
+                  val,
+                ) async {
+                  await SecureStorage.setBiometricStatus(val);
+                  setState(() => _biometricUnlock = val);
+                }, primaryColor),
+                _buildDivider(),
+                _buildSettingsLabelItem(
+                  'Auto Lock',
+                  _autoLockLabel(_autoLockSeconds),
+                  onTap: _showAutoLockPicker,
                 ),
                 _buildDivider(),
-                _buildSettingsLabelItem('Auto Lock', '1 minute'),
-                _buildDivider(),
-                _buildSettingsLabelItem('Max Attempts', '5', isLast: true),
+                _buildSettingsLabelItem(
+                  'Max Attempts',
+                  '$_maxAttempts',
+                  isLast: true,
+                  onTap: _showMaxAttemptsPicker,
+                ),
               ],
             ),
           ),
@@ -310,6 +438,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildDivider(),
                 _buildSettingsActionItem(
                   'Import Data',
+                  onTap: () async {
+                    final service = DataTransferService();
+                    final count = await service.importFromJson();
+                    if (!mounted) return;
+                    if (count > 0) {
+                      ref.invalidate(vaultProvider);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Imported $count items'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else if (count == 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No items to import'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Import failed — invalid file'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                   trailing: Icon(
                     Icons.download,
                     color: Theme.of(
@@ -321,6 +477,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildDivider(),
                 _buildSettingsActionItem(
                   'Export Data',
+                  onTap: () async {
+                    final service = DataTransferService();
+                    final path = await service.exportToJson();
+                    if (!mounted) return;
+                    if (path != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Exported to $path'),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 4),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Nothing to export'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                   trailing: Icon(
                     Icons.upload,
                     color: Theme.of(
