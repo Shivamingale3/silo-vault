@@ -1,51 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_vault/core/enums/db_enums.dart';
-import 'package:notes_vault/features/models/sample_data.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
 import 'package:notes_vault/features/widgets/home/search_bar_widget.dart';
 import 'vault/vault_filter_tabs.dart';
 import 'vault/vault_item_tile.dart';
 
-class VaultView extends StatefulWidget {
+class VaultView extends ConsumerStatefulWidget {
   const VaultView({super.key});
 
   @override
-  State<VaultView> createState() => _VaultViewState();
+  ConsumerState<VaultView> createState() => _VaultViewState();
 }
 
-class _VaultViewState extends State<VaultView> {
+class _VaultViewState extends ConsumerState<VaultView> {
   int _selectedFilterIndex = 0;
   String _searchQuery = '';
   final Set<ItemTag> _selectedTags = {};
   SortBy _sortBy = SortBy.dateUpdated;
 
-  List<VaultItem> get _filteredItems {
-    // Step 1: Apply filter tab
-    List<VaultItem> items;
-    switch (_selectedFilterIndex) {
-      case 1: // Passwords
-        items = SampleData.passwordItems;
-      case 2: // Notes
-        items = SampleData.noteItems;
-      case 3: // Favorites
-        items = SampleData.favoriteItems;
-      case 4: // Trash
-        items = SampleData.trashedItems;
-      default: // All
-        items = SampleData.activeItems;
-    }
-
-    // Step 2: Apply search
+  List<VaultItem> _applyFilters(List<VaultItem> items) {
+    // Step 1: Apply search
     if (_searchQuery.isNotEmpty) {
       items = items.where((item) => item.matchesSearch(_searchQuery)).toList();
     }
 
-    // Step 3: Apply tag filter
+    // Step 2: Apply tag filter
     if (_selectedTags.isNotEmpty) {
       items = items.where((item) => item.hasAnyTag(_selectedTags)).toList();
     }
 
-    // Step 4: Apply sort
+    // Step 3: Apply sort
     items = List<VaultItem>.from(items);
     switch (_sortBy) {
       case SortBy.nameAsc:
@@ -64,15 +50,11 @@ class _VaultViewState extends State<VaultView> {
   }
 
   void _onToggleFavorite(VaultItem item) {
-    setState(() {
-      item.isFavorite = !item.isFavorite;
-    });
+    ref.read(vaultProvider.notifier).toggleFavorite(item.id);
   }
 
   void _onTrash(VaultItem item) {
-    setState(() {
-      item.isTrashed = true;
-    });
+    ref.read(vaultProvider.notifier).trashItem(item.id);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('"${item.title}" moved to Trash'),
@@ -80,9 +62,7 @@ class _VaultViewState extends State<VaultView> {
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
-            setState(() {
-              item.isTrashed = false;
-            });
+            ref.read(vaultProvider.notifier).restoreItem(item.id);
           },
         ),
       ),
@@ -90,9 +70,7 @@ class _VaultViewState extends State<VaultView> {
   }
 
   void _onRestore(VaultItem item) {
-    setState(() {
-      item.isTrashed = false;
-    });
+    ref.read(vaultProvider.notifier).restoreItem(item.id);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('"${item.title}" restored'),
@@ -120,7 +98,31 @@ class _VaultViewState extends State<VaultView> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    final filteredItems = _filteredItems;
+
+    // Select the right provider based on filter tab
+    List<VaultItem> baseItems;
+    switch (_selectedFilterIndex) {
+      case 1:
+        baseItems = ref.watch(passwordItemsProvider);
+      case 2:
+        baseItems = ref.watch(noteItemsProvider);
+      case 3:
+        baseItems = ref.watch(favoriteItemsProvider);
+      case 4:
+        baseItems = ref.watch(trashedItemsProvider);
+      default:
+        baseItems = ref.watch(activeItemsProvider);
+    }
+
+    final filteredItems = _applyFilters(baseItems);
+
+    // Collect all unique tags from current active items for chip row
+    final allActiveTags = <ItemTag>{};
+    for (final item in ref.watch(activeItemsProvider)) {
+      allActiveTags.addAll(item.tags);
+    }
+    final sortedTags = allActiveTags.toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +140,7 @@ class _VaultViewState extends State<VaultView> {
         ),
 
         // Tag chips row
-        _buildTagChipsRow(isDark, colorScheme),
+        _buildTagChipsRow(isDark, colorScheme, sortedTags),
 
         // Sort & result count row
         _buildSortRow(isDark, colorScheme, filteredItems.length),
@@ -165,10 +167,11 @@ class _VaultViewState extends State<VaultView> {
     );
   }
 
-  Widget _buildTagChipsRow(bool isDark, ColorScheme colorScheme) {
-    final allTags = SampleData.allActiveTags.toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-
+  Widget _buildTagChipsRow(
+    bool isDark,
+    ColorScheme colorScheme,
+    List<ItemTag> allTags,
+  ) {
     if (allTags.isEmpty) return const SizedBox.shrink();
 
     return SingleChildScrollView(

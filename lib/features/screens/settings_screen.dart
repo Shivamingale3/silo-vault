@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/core/enums/app_enums.dart';
 import 'package:notes_vault/core/providers/dev_mode_provider.dart';
 import 'package:notes_vault/core/theme/theme_provider.dart';
@@ -528,6 +530,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _buildSettingsActionItem(
                   'View Database',
+                  onTap: () => context.push(AppRoutes.dbViewer),
                   trailing: Icon(
                     Icons.data_object,
                     color: Theme.of(

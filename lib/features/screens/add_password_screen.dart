@@ -1,28 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
+import 'package:notes_vault/core/utils/password_utils.dart';
+import 'package:notes_vault/features/models/vault_item.dart';
 import 'package:notes_vault/features/widgets/upsert/amoled_input.dart';
 import 'package:notes_vault/features/widgets/upsert/pill_chip.dart';
 
-class AddPasswordScreen extends StatefulWidget {
+class AddPasswordScreen extends ConsumerStatefulWidget {
   const AddPasswordScreen({super.key});
 
   @override
-  State<AddPasswordScreen> createState() => _AddPasswordScreenState();
+  ConsumerState<AddPasswordScreen> createState() => _AddPasswordScreenState();
 }
 
-class _AddPasswordScreenState extends State<AddPasswordScreen> {
+class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
   final _titleController = TextEditingController();
   final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController(text: '••••••••••••');
+  final _passwordController = TextEditingController();
   final _urlController = TextEditingController();
   final _notesController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isFavorite = false;
-  String _activeTag = 'Work';
+  NoteCategory _selectedCategory = NoteCategory.work;
+  PasswordStrength _passwordStrength = PasswordStrength.weak;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_updateStrength);
+  }
+
+  void _updateStrength() {
+    setState(() {
+      _passwordStrength = PasswordUtils.calculateStrength(
+        _passwordController.text,
+      );
+    });
+  }
 
   @override
   void dispose() {
+    _passwordController.removeListener(_updateStrength);
     _titleController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
@@ -31,28 +52,71 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
     super.dispose();
   }
 
-  void _onSave() {
-    context.pop();
+  Future<void> _onSave() async {
+    final title = _titleController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Title cannot be empty')));
+      return;
+    }
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Password cannot be empty')));
+      return;
+    }
+
+    final now = DateTime.now();
+    final item = VaultItem(
+      id: '',
+      type: NoteType.password,
+      title: title,
+      username: _usernameController.text.isEmpty
+          ? null
+          : _usernameController.text.trim(),
+      password: password,
+      websiteUrl: _urlController.text.isEmpty
+          ? null
+          : _urlController.text.trim(),
+      content: _notesController.text.isEmpty ? null : _notesController.text,
+      category: _selectedCategory,
+      isFavorite: _isFavorite,
+      passwordStrength: _passwordStrength,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await ref.read(vaultProvider.notifier).addItem(item);
+
+    if (mounted) context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () => context.pop(),
-          icon: const Icon(Icons.chevron_left, color: Colors.white, size: 28),
+          icon: Icon(
+            Icons.chevron_left,
+            color: theme.colorScheme.onSurface,
+            size: 28,
+          ),
         ),
-        title: const Text(
+        title: Text(
           'New Password',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -98,9 +162,13 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
           SafeArea(
             child: Container(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                border: Border(top: BorderSide(color: Colors.white12)),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                border: Border(
+                  top: BorderSide(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+                ),
               ),
               child: const Text(
                 'Last updated: Just now',
@@ -322,18 +390,22 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                 children: [
                   PillChip(
                     label: 'Work',
-                    isActive: _activeTag == 'Work',
-                    onTap: () => setState(() => _activeTag = 'Work'),
+                    isActive: _selectedCategory == NoteCategory.work,
+                    onTap: () =>
+                        setState(() => _selectedCategory = NoteCategory.work),
                   ),
                   PillChip(
                     label: 'Personal',
-                    isActive: _activeTag == 'Personal',
-                    onTap: () => setState(() => _activeTag = 'Personal'),
+                    isActive: _selectedCategory == NoteCategory.personal,
+                    onTap: () => setState(
+                      () => _selectedCategory = NoteCategory.personal,
+                    ),
                   ),
                   PillChip(
                     label: 'Social',
-                    isActive: _activeTag == 'Social',
-                    onTap: () => setState(() => _activeTag = 'Social'),
+                    isActive: _selectedCategory == NoteCategory.social,
+                    onTap: () =>
+                        setState(() => _selectedCategory = NoteCategory.social),
                   ),
                   GestureDetector(
                     onTap: () {},

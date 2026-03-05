@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
+import 'package:notes_vault/features/models/vault_item.dart';
 import 'package:notes_vault/features/widgets/upsert/amoled_input.dart';
 import 'package:notes_vault/features/widgets/upsert/pill_chip.dart';
 
-class AddNoteScreen extends StatefulWidget {
+class AddNoteScreen extends ConsumerStatefulWidget {
   const AddNoteScreen({super.key});
 
   @override
-  State<AddNoteScreen> createState() => _AddNoteScreenState();
+  ConsumerState<AddNoteScreen> createState() => _AddNoteScreenState();
 }
 
-class _AddNoteScreenState extends State<AddNoteScreen> {
+class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   bool _isFavorite = false;
+  final Set<ItemTag> _selectedTags = {};
 
   @override
   void dispose() {
@@ -22,9 +27,31 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     super.dispose();
   }
 
-  void _onSave() {
-    // Save logic
-    context.pop();
+  Future<void> _onSave() async {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Title cannot be empty')));
+      return;
+    }
+
+    final now = DateTime.now();
+    final item = VaultItem(
+      id: '',
+      type: NoteType.note,
+      title: title,
+      content: _contentController.text.isEmpty ? null : _contentController.text,
+      category: NoteCategory.personal,
+      tags: _selectedTags.toList(),
+      isFavorite: _isFavorite,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await ref.read(vaultProvider.notifier).addItem(item);
+
+    if (mounted) context.pop();
   }
 
   @override
@@ -34,9 +61,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     final primaryColor = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Colors.black, // Amoled design uses pure black
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black.withValues(alpha: 0.95),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leadingWidth: 80,
         leading: TextButton.icon(
@@ -122,6 +149,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   }
 
   Widget _buildFooter(bool isDark) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.only(
         left: 16,
@@ -129,9 +157,11 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         top: 16,
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        border: Border(top: BorderSide(color: Colors.white12)),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+        ),
       ),
       child: Row(
         children: [

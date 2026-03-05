@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
+import 'package:notes_vault/core/utils/password_utils.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
 import 'package:notes_vault/features/widgets/upsert/amoled_input.dart';
 
-class EditPasswordScreen extends StatefulWidget {
+class EditPasswordScreen extends ConsumerStatefulWidget {
   final VaultItem item;
 
   const EditPasswordScreen({super.key, required this.item});
 
   @override
-  State<EditPasswordScreen> createState() => _EditPasswordScreenState();
+  ConsumerState<EditPasswordScreen> createState() => _EditPasswordScreenState();
 }
 
-class _EditPasswordScreenState extends State<EditPasswordScreen> {
+class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
   late TextEditingController _titleController;
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
@@ -45,8 +49,68 @@ class _EditPasswordScreenState extends State<EditPasswordScreen> {
     super.dispose();
   }
 
-  void _onSave() {
-    context.pop();
+  Future<void> _onSave() async {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Title cannot be empty')));
+      return;
+    }
+
+    final password = _passwordController.text.trim();
+    final updated = VaultItem(
+      id: widget.item.id,
+      type: NoteType.password,
+      title: title,
+      username: _usernameController.text.isEmpty
+          ? null
+          : _usernameController.text.trim(),
+      password: password.isEmpty ? null : password,
+      websiteUrl: _urlController.text.isEmpty
+          ? null
+          : _urlController.text.trim(),
+      content: _notesController.text.isEmpty ? null : _notesController.text,
+      category: widget.item.category,
+      tags: widget.item.tags,
+      isFavorite: widget.item.isFavorite,
+      passwordStrength: password.isEmpty
+          ? null
+          : PasswordUtils.calculateStrength(password),
+      createdAt: widget.item.createdAt,
+      updatedAt: DateTime.now(),
+    );
+
+    await ref.read(vaultProvider.notifier).updateItem(updated);
+
+    if (mounted) context.pop();
+  }
+
+  // ignore: unused_element
+  Future<void> _onDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Password'),
+        content: const Text('This action cannot be undone. Are you sure?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await ref.read(vaultProvider.notifier).deleteItem(widget.item.id);
+      if (mounted) context.pop();
+    }
   }
 
   @override

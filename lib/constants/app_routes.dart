@@ -10,4 +10,5 @@ class AppRoutes {
   static const String addPassword = '/add-password';
   static const String editNote = '/edit-note';
   static const String editPassword = '/edit-password';
+  static const String dbViewer = '/db-viewer';
 }

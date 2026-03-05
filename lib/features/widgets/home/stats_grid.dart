@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../models/sample_data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
 
-class StatsGrid extends StatelessWidget {
+class StatsGrid extends ConsumerWidget {
   const StatsGrid({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(vaultStatsProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       child: Column(
@@ -16,7 +19,7 @@ class StatsGrid extends StatelessWidget {
                 child: _buildStatCard(
                   context,
                   icon: Icons.key_outlined,
-                  count: SampleData.passwordCount.toString(),
+                  count: stats.passwordCount.toString(),
                   label: 'All Passwords',
                 ),
               ),
@@ -25,7 +28,7 @@ class StatsGrid extends StatelessWidget {
                 child: _buildStatCard(
                   context,
                   icon: Icons.sticky_note_2_outlined,
-                  count: SampleData.noteCount.toString(),
+                  count: stats.noteCount.toString(),
                   label: 'Secure Notes',
                 ),
               ),
@@ -38,7 +41,7 @@ class StatsGrid extends StatelessWidget {
                 child: _buildStatCard(
                   context,
                   icon: Icons.star_outline,
-                  count: SampleData.favoriteCount.toString(),
+                  count: stats.favoriteCount.toString(),
                   label: 'Favorites',
                 ),
               ),
@@ -47,7 +50,7 @@ class StatsGrid extends StatelessWidget {
                 child: _buildStatCard(
                   context,
                   icon: Icons.delete_outline,
-                  count: SampleData.trashCount.toString(),
+                  count: stats.trashCount.toString(),
                   label: 'In Trash',
                 ),
               ),

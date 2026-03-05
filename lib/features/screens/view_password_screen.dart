@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:notes_vault/constants/app_routes.dart';
 import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ViewPasswordScreen extends StatefulWidget {
+class ViewPasswordScreen extends ConsumerStatefulWidget {
   final VaultItem item;
 
   const ViewPasswordScreen({super.key, required this.item});
 
   @override
-  State<ViewPasswordScreen> createState() => _ViewPasswordScreenState();
+  ConsumerState<ViewPasswordScreen> createState() => _ViewPasswordScreenState();
 }
 
-class _ViewPasswordScreenState extends State<ViewPasswordScreen> {
+class _ViewPasswordScreenState extends ConsumerState<ViewPasswordScreen> {
   bool _passwordVisible = false;
 
   VaultItem get item => widget.item;
@@ -103,10 +106,77 @@ class _ViewPasswordScreenState extends State<ViewPasswordScreen> {
             },
             splashRadius: 20,
           ),
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, size: 24),
-            onPressed: () {},
-            splashRadius: 20,
+            onSelected: (value) async {
+              switch (value) {
+                case 'trash':
+                  await ref.read(vaultProvider.notifier).trashItem(item.id);
+                  if (context.mounted) context.pop();
+                case 'delete':
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Delete Password'),
+                      content: const Text('This cannot be undone.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.redAccent,
+                          ),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true && context.mounted) {
+                    await ref.read(vaultProvider.notifier).deleteItem(item.id);
+                    if (context.mounted) context.pop();
+                  }
+                case 'launch':
+                  if (item.websiteUrl != null && item.websiteUrl!.isNotEmpty) {
+                    final uri = Uri.parse(item.websiteUrl!);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  }
+              }
+            },
+            itemBuilder: (context) => [
+              if (item.websiteUrl != null && item.websiteUrl!.isNotEmpty)
+                const PopupMenuItem(
+                  value: 'launch',
+                  child: ListTile(
+                    leading: Icon(Icons.open_in_new),
+                    title: Text('Open Website'),
+                  ),
+                ),
+              const PopupMenuItem(
+                value: 'trash',
+                child: ListTile(
+                  leading: Icon(Icons.delete_outline),
+                  title: Text('Move to Trash'),
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(Icons.delete_forever, color: Colors.redAccent),
+                  title: Text(
+                    'Delete Forever',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

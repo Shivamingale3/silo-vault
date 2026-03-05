@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:notes_vault/core/providers/vault_provider.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
 
-class EditNoteScreen extends StatefulWidget {
+class EditNoteScreen extends ConsumerStatefulWidget {
   final VaultItem item;
 
   const EditNoteScreen({super.key, required this.item});
 
   @override
-  State<EditNoteScreen> createState() => _EditNoteScreenState();
+  ConsumerState<EditNoteScreen> createState() => _EditNoteScreenState();
 }
 
-class _EditNoteScreenState extends State<EditNoteScreen> {
+class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   bool _isFavorite = false;
@@ -31,8 +34,24 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     super.dispose();
   }
 
-  void _onDone() {
-    context.pop();
+  Future<void> _onDone() async {
+    final updated = VaultItem(
+      id: widget.item.id,
+      type: NoteType.note,
+      title: _titleController.text.trim().isEmpty
+          ? widget.item.title
+          : _titleController.text.trim(),
+      content: _contentController.text.isEmpty ? null : _contentController.text,
+      category: widget.item.category,
+      tags: widget.item.tags,
+      isFavorite: _isFavorite,
+      createdAt: widget.item.createdAt,
+      updatedAt: DateTime.now(),
+    );
+
+    await ref.read(vaultProvider.notifier).updateItem(updated);
+
+    if (mounted) context.pop();
   }
 
   @override
@@ -41,11 +60,12 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     // though it can adapt slightly if needed.
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    // final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white.withValues(alpha: 0.95),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leadingWidth: 90,
         leading: TextButton.icon(
@@ -154,29 +174,33 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
           backgroundColor: primaryColor,
           elevation: 4,
           shape: const CircleBorder(),
-          child: const Icon(Icons.draw, color: Colors.white, size: 28),
+          child: Icon(Icons.draw, color: theme.colorScheme.onPrimary, size: 28),
         ),
       ),
     );
   }
 
   Widget _buildSubHeader() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF2F2F7),
-        border: Border(bottom: BorderSide(color: Colors.black12)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer,
+        border: Border(
+          bottom: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'LAST EDITED: ${widget.item.timeAgoUpdated.toUpperCase()}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
-              color: Color(0xFF8E8E93),
+              color: isDark ? Colors.white54 : const Color(0xFF8E8E93),
             ),
           ),
           Row(
@@ -206,6 +230,8 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   Widget _buildFooter(Color primaryColor) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.only(
         left: 16,
@@ -214,8 +240,10 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 8,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        border: const Border(top: BorderSide(color: Colors.black12)),
+        color: theme.scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,21 +256,27 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2F2F7),
+                  color: theme.colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.black12),
+                  border: Border.all(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.sell, size: 14, color: Color(0xFF8E8E93)),
+                    Icon(
+                      Icons.sell,
+                      size: 14,
+                      color: isDark ? Colors.white54 : const Color(0xFF8E8E93),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       widget.item.category.name[0].toUpperCase() +
                           widget.item.category.name.substring(1),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black87,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -255,14 +289,16 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2F2F7),
+                    color: theme.colorScheme.surfaceContainer,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black12),
+                    border: Border.all(
+                      color: isDark ? Colors.white12 : Colors.black12,
+                    ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.add,
                     size: 18,
-                    color: Color(0xFF8E8E93),
+                    color: isDark ? Colors.white54 : const Color(0xFF8E8E93),
                   ),
                 ),
               ),

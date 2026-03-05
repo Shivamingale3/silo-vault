@@ -16,6 +16,7 @@ import 'package:notes_vault/features/screens/edit_note_screen.dart';
 import 'package:notes_vault/features/screens/edit_password_screen.dart';
 import 'package:notes_vault/features/screens/password_generator_screen.dart';
 import 'package:notes_vault/features/screens/settings_screen.dart';
+import 'package:notes_vault/features/screens/db_viewer_screen.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -63,6 +64,10 @@ final appRouter = GoRouter(
       path: AppRoutes.editPassword,
       builder: (context, state) =>
           EditPasswordScreen(item: state.extra as VaultItem),
+    ),
+    GoRoute(
+      path: AppRoutes.dbViewer,
+      builder: (context, state) => const DbViewerScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
