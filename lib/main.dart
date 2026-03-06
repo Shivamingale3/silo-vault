@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_vault/core/enums/app_enums.dart';
 import 'package:notes_vault/core/routing/app_router.dart';
 import 'package:notes_vault/core/theme/app_theme.dart';
 import 'package:notes_vault/core/theme/theme_provider.dart';
 import 'package:notes_vault/database/isar.dart';
+import 'package:notes_vault/firebase_options.dart';
 import 'package:notes_vault/security/app_lifecycle_observer.dart';
 import 'package:notes_vault/core/security/secure_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await IsarDb.init();
 
   final initialThemeStr = await SecureStorage.getAppTheme();

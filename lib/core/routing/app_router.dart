@@ -5,6 +5,7 @@ import 'package:notes_vault/features/screens/add_note_screen.dart';
 import 'package:notes_vault/features/screens/app_lock_screen.dart';
 import 'package:notes_vault/features/screens/error_screen.dart';
 import 'package:notes_vault/features/screens/home_screen.dart';
+import 'package:notes_vault/features/screens/test_screen.dart';
 import 'package:notes_vault/features/screens/vault_screen.dart';
 import 'package:notes_vault/features/screens/pin_setup_screen.dart';
 import 'package:notes_vault/features/screens/splash_screen.dart';
@@ -72,6 +73,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.passwordGenerator,
       builder: (context, state) => const PasswordGeneratorScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.testScreen,
+      builder: (context, state) => const TestScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

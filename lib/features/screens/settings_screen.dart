@@ -6,8 +6,16 @@ import 'package:notes_vault/core/enums/app_enums.dart';
 import 'package:notes_vault/core/providers/dev_mode_provider.dart';
 import 'package:notes_vault/core/providers/vault_provider.dart';
 import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:notes_vault/core/services/auth_service.dart';
+import 'package:notes_vault/core/services/cached_profile.dart';
+import 'package:notes_vault/core/services/connectivity_service.dart';
 import 'package:notes_vault/core/services/data_transfer_service.dart';
+import 'package:notes_vault/core/services/sync_service.dart';
 import 'package:notes_vault/core/theme/theme_provider.dart';
+import 'package:notes_vault/database/firestore_repository.dart';
+import 'package:notes_vault/features/widgets/sync/sync_password_entry_sheet.dart';
+import 'package:notes_vault/features/widgets/sync/sync_password_setup_sheet.dart';
+import 'package:notes_vault/features/widgets/sync/sync_progress_dialog.dart';
 import 'package:notes_vault/security/biometric_auth.dart';
 import 'package:notes_vault/core/enums/security_enums.dart';
 
@@ -24,7 +32,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   int _versionClickCount = 0;
   int _autoLockSeconds = 60;
   int _maxAttempts = 5;
-  // bool _loaded = false;
+  CachedProfileData? _cachedProfile;
+  bool _isSyncing = false;
 
   @override
   void initState() {
@@ -36,13 +45,146 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final bio = await SecureStorage.getBiometricStatus();
     final lock = await SecureStorage.getAutoLockTimeout();
     final attempts = await SecureStorage.getMaxUnlockAttempts();
+    final syncEnabled = await SyncService.isSyncEnabled();
+    final profile = await CachedProfile.getCachedProfile();
     if (!mounted) return;
     setState(() {
       _biometricUnlock = bio;
       _autoLockSeconds = lock;
       _maxAttempts = attempts;
-      // _loaded = true;
+      _syncToCloud = syncEnabled;
+      _cachedProfile = profile;
     });
+  }
+
+  Future<void> _handleSignIn() async {
+    final user = await AuthService.signInWithGoogle();
+    if (user == null || !mounted) return;
+    final profile = await CachedProfile.getCachedProfile();
+    if (!mounted) return;
+    setState(() => _cachedProfile = profile);
+  }
+
+  Future<void> _handleSignOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text(
+          'Your local data will remain. Cloud sync will stop.\n\nAre you sure?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await SyncService.disableSync();
+    await AuthService.signOut();
+    if (!mounted) return;
+    setState(() {
+      _syncToCloud = false;
+      _cachedProfile = null;
+    });
+  }
+
+  Future<void> _handleSyncToggle(bool val) async {
+    if (val) {
+      // Enabling sync
+      if (!await ConnectivityService.isOnline()) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No internet connection')));
+        return;
+      }
+
+      // Must be signed in first
+      if (!AuthService.isAuthenticated) {
+        await _handleSignIn();
+        if (!AuthService.isAuthenticated || !mounted) return;
+      }
+
+      // Check if this account already has a wrapped key (existing sync)
+      final hasKey = await FirestoreRepository.hasWrappedKey();
+
+      if (hasKey) {
+        // Existing sync — ask for sync password
+        if (!mounted) return;
+        final result = await showModalBottomSheet<bool>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => SyncPasswordEntrySheet(
+            onPasswordEntered: (password) async {
+              final r = await SyncService.setupFromRemote(password);
+              return r.success;
+            },
+          ),
+        );
+        if (result == true && mounted) {
+          ref.invalidate(vaultProvider);
+          setState(() => _syncToCloud = true);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Sync setup complete!')));
+        }
+      } else {
+        // New sync — set up sync password
+        if (!mounted) return;
+        await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => SyncPasswordSetupSheet(
+            onPasswordSet: (password) async {
+              final result = await SyncService.initializeSync(password);
+              if (!result.success) throw Exception(result.message);
+            },
+          ),
+        );
+        // Check if sync was actually enabled
+        final enabled = await SyncService.isSyncEnabled();
+        if (mounted) {
+          setState(() => _syncToCloud = enabled);
+          if (enabled) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cloud sync enabled!')),
+            );
+          }
+        }
+      }
+    } else {
+      // Disabling sync
+      await SyncService.disableSync();
+      if (mounted) setState(() => _syncToCloud = false);
+    }
+  }
+
+  Future<void> _handleSyncNow() async {
+    if (_isSyncing) return;
+    setState(() => _isSyncing = true);
+
+    await showSyncProgressFlow(
+      context,
+      syncOperation: () async {
+        final r = await SyncService.fullSync();
+        return (success: r.success, message: r.message);
+      },
+      onComplete: () {
+        ref.invalidate(vaultProvider);
+      },
+    );
+
+    if (mounted) setState(() => _isSyncing = false);
   }
 
   String _autoLockLabel(int seconds) {
@@ -175,64 +317,166 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildProfileSection(Color primaryColor) {
+    final theme = Theme.of(context);
+    final isSignedIn =
+        AuthService.isAuthenticated && _cachedProfile?.hasProfile == true;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(
-            context,
-          ).colorScheme.onSurface.withValues(alpha: 0.05),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
         ),
       ),
       padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
-            ),
-            child: Center(
-              child: Icon(Icons.account_circle, color: primaryColor, size: 32),
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      child: isSignedIn
+          ? _buildSignedInProfile(theme, primaryColor)
+          : _buildGuestProfile(theme, primaryColor),
+    );
+  }
+
+  Widget _buildSignedInProfile(ThemeData theme, Color primaryColor) {
+    final profile = _cachedProfile!;
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: primaryColor.withValues(alpha: 0.2),
+          backgroundImage: profile.photoFile != null
+              ? FileImage(profile.photoFile!)
+              : null,
+          child: profile.photoFile == null
+              ? Icon(Icons.person, color: primaryColor, size: 28)
+              : null,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                profile.displayName ?? 'User',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              if (profile.email != null) ...[
+                const SizedBox(height: 2),
                 Text(
-                  'My Vault',
+                  profile.email!,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                   ),
                 ),
-                SizedBox(height: 2),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final stats = ref.watch(vaultStatsProvider);
-                    return Text(
-                      '${stats.passwordCount} passwords · ${stats.noteCount} notes',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.54),
-                      ),
-                    );
-                  },
-                ),
               ],
+              const SizedBox(height: 2),
+              Consumer(
+                builder: (context, ref, _) {
+                  final stats = ref.watch(vaultStatsProvider);
+                  return Text(
+                    '${stats.passwordCount} passwords \u00B7 ${stats.noteCount} notes',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: _handleSignOut,
+          icon: Icon(
+            Icons.logout_rounded,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            size: 20,
+          ),
+          tooltip: 'Sign Out',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGuestProfile(ThemeData theme, Color primaryColor) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+                border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.account_circle,
+                  color: primaryColor,
+                  size: 32,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'My Vault',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final stats = ref.watch(vaultStatsProvider);
+                      return Text(
+                        '${stats.passwordCount} passwords \u00B7 ${stats.noteCount} notes',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.54,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 40,
+          child: OutlinedButton.icon(
+            onPressed: _handleSignIn,
+            icon: Icon(Icons.login_rounded, size: 18),
+            label: const Text(
+              'Sign in to enable sync',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: primaryColor,
+              side: BorderSide(color: primaryColor.withValues(alpha: 0.4)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -447,9 +691,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingsToggleItem(
                   'Sync to Cloud',
                   _syncToCloud,
-                  (val) => setState(() => _syncToCloud = val),
+                  _handleSyncToggle,
                   primaryColor,
                 ),
+                if (_syncToCloud) ...[
+                  _buildDivider(),
+                  _buildSettingsActionItem(
+                    'Sync Now',
+                    onTap: _handleSyncNow,
+                    trailing: _isSyncing
+                        ? SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            Icons.sync_rounded,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
+                            size: 20,
+                          ),
+                  ),
+                ],
                 _buildDivider(),
                 _buildSettingsActionItem(
                   'Import Data',

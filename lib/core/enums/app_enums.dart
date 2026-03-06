@@ -9,6 +9,13 @@ enum AppKeys {
   autoLockTimeout,
   encryptionKey,
   appTheme,
+  syncEnabled,
+  syncPassword,
+  wrappedEncryptionKey,
+  syncSalt,
+  cachedDisplayName,
+  cachedEmail,
+  cachedPhotoPath,
 }
 
 enum AppThemeMode { light, dark, amoled }
