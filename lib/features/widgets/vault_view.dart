@@ -147,21 +147,28 @@ class _VaultViewState extends ConsumerState<VaultView> {
 
         // Items list
         Expanded(
-          child: filteredItems.isEmpty
-              ? _buildEmptyState(isDark)
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 120),
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = filteredItems[index];
-                    return VaultItemTile(
-                      item: item,
-                      onToggleFavorite: () => _onToggleFavorite(item),
-                      onTrash: () => _onTrash(item),
-                      onRestore: () => _onRestore(item),
-                    );
-                  },
-                ),
+          child: RefreshIndicator(
+            onRefresh: () => ref.read(vaultProvider.notifier).reload(),
+            child: filteredItems.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [_buildEmptyState(isDark)],
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 120),
+                    itemCount: filteredItems.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredItems[index];
+                      return VaultItemTile(
+                        item: item,
+                        onToggleFavorite: () => _onToggleFavorite(item),
+                        onTrash: () => _onTrash(item),
+                        onRestore: () => _onRestore(item),
+                      );
+                    },
+                  ),
+          ),
         ),
       ],
     );

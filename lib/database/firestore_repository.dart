@@ -50,9 +50,11 @@ class FirestoreRepository {
     }, SetOptions(merge: true));
   }
 
-  /// Gets all vault items from Firestore.
+  /// Gets all vault items from Firestore (excludes soft-deleted).
   static Future<List<Map<String, dynamic>>> getAllItems() async {
-    final snapshot = await _vaultCollection.get();
+    final snapshot = await _vaultCollection
+        .where('isDeleted', isEqualTo: false)
+        .get();
     return snapshot.docs.map((doc) => doc.data()).toList();
   }
 

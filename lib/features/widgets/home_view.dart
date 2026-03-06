@@ -54,26 +54,30 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ? recent
         : recent.where((i) => i.matchesSearch(_searchQuery)).toList();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SearchBarWidget(
-            onChanged: (query) => setState(() => _searchQuery = query),
-          ),
-          const QuickActionsGrid(),
-          FavoritesList(
-            favorites: filteredFavorites,
-            onCopy: _onCopyPassword,
-            onToggleFavorite: _onToggleFavorite,
-          ),
-          const StatsGrid(),
-          RecentActivityList(
-            recentItems: filteredRecent,
-            onCopy: _onCopyPassword,
-          ),
-        ],
+    return RefreshIndicator(
+      onRefresh: () => ref.read(vaultProvider.notifier).reload(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SearchBarWidget(
+              onChanged: (query) => setState(() => _searchQuery = query),
+            ),
+            const QuickActionsGrid(),
+            FavoritesList(
+              favorites: filteredFavorites,
+              onCopy: _onCopyPassword,
+              onToggleFavorite: _onToggleFavorite,
+            ),
+            const StatsGrid(),
+            RecentActivityList(
+              recentItems: filteredRecent,
+              onCopy: _onCopyPassword,
+            ),
+          ],
+        ),
       ),
     );
   }

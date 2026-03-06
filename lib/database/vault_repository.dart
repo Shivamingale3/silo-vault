@@ -1,5 +1,8 @@
 import 'package:isar_community/isar.dart';
 import 'package:notes_vault/core/security/encryption_service.dart';
+import 'package:notes_vault/core/services/auth_service.dart';
+import 'package:notes_vault/core/services/sync_service.dart';
+import 'package:notes_vault/database/firestore_repository.dart';
 import 'package:notes_vault/database/isar.dart';
 import 'package:notes_vault/database/models/vault_item_entity.dart';
 import 'package:notes_vault/features/models/vault_item.dart';
@@ -43,6 +46,16 @@ class VaultRepository {
     await IsarDb.isar.writeTxn(() async {
       await IsarDb.isar.vaultItemEntitys.deleteByItemId(itemId);
     });
+
+    // Propagate deletion to Firestore if sync is enabled
+    try {
+      if (await SyncService.isSyncEnabled()) {
+        await AuthService.refreshTokenIfNeeded();
+        await FirestoreRepository.softDeleteItem(itemId);
+      }
+    } catch (_) {
+      // Best-effort — if offline, the item is already gone locally
+    }
   }
 
   Future<List<VaultItem>> getAllItems() async {

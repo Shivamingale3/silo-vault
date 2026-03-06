@@ -175,20 +175,26 @@ class SyncService {
 
       final isar = IsarDb.isar;
 
-      // Find the latest lastSyncedAt across all local items
-      final latestSynced = await isar.vaultItemEntitys
-          .where()
-          .sortByLastSyncedAtDesc()
-          .findFirst();
-
-      final since =
-          latestSynced?.lastSyncedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      // Check if this is a first sync (no local items at all)
+      final localCount = await isar.vaultItemEntitys.count();
 
       List<Map<String, dynamic>> remoteMaps;
-      if (latestSynced == null) {
+      if (localCount == 0) {
         // First pull — get everything
         remoteMaps = await FirestoreRepository.getAllItems();
       } else {
+        // Find the latest lastSyncedAt manually (Isar may not sort nullable DateTime)
+        final allEntities = await isar.vaultItemEntitys.where().findAll();
+        DateTime? latestSync;
+        for (final e in allEntities) {
+          if (e.lastSyncedAt != null) {
+            if (latestSync == null || e.lastSyncedAt!.isAfter(latestSync)) {
+              latestSync = e.lastSyncedAt;
+            }
+          }
+        }
+
+        final since = latestSync ?? DateTime.fromMillisecondsSinceEpoch(0);
         remoteMaps = await FirestoreRepository.getModifiedSince(since);
       }
 
@@ -199,32 +205,37 @@ class SyncService {
       int merged = 0;
       await isar.writeTxn(() async {
         for (final map in remoteMaps) {
-          final isDeleted = map['isDeleted'] as bool? ?? false;
-          final remoteItemId = map['itemId'] as String;
+          try {
+            final isDeleted = map['isDeleted'] as bool? ?? false;
+            final remoteItemId = map['itemId'] as String;
 
-          if (isDeleted) {
-            await isar.vaultItemEntitys.deleteByItemId(remoteItemId);
-            merged++;
-            continue;
-          }
+            if (isDeleted) {
+              await isar.vaultItemEntitys.deleteByItemId(remoteItemId);
+              merged++;
+              continue;
+            }
 
-          final remoteEntity = FirestoreRepository.mapToEntity(map);
-          final localEntity = await isar.vaultItemEntitys.getByItemId(
-            remoteItemId,
-          );
+            final remoteEntity = FirestoreRepository.mapToEntity(map);
+            final localEntity = await isar.vaultItemEntitys.getByItemId(
+              remoteItemId,
+            );
 
-          if (localEntity == null) {
-            // New item from remote
-            await isar.vaultItemEntitys.put(remoteEntity);
-            merged++;
-          } else {
-            // Conflict resolution: last-write-wins
-            if (remoteEntity.updatedAt.isAfter(localEntity.updatedAt)) {
-              remoteEntity.isarId = localEntity.isarId;
+            if (localEntity == null) {
+              // New item from remote
               await isar.vaultItemEntitys.put(remoteEntity);
               merged++;
+            } else {
+              // Conflict resolution: last-write-wins
+              if (remoteEntity.updatedAt.isAfter(localEntity.updatedAt)) {
+                remoteEntity.isarId = localEntity.isarId;
+                await isar.vaultItemEntitys.put(remoteEntity);
+                merged++;
+              }
+              // else: local is newer, skip (it will be pushed next)
             }
-            // else: local is newer, skip (it will be pushed next)
+          } catch (itemError) {
+            // Skip individual items that fail to parse, continue with others
+            continue;
           }
         }
       });
