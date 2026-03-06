@@ -130,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   SizedBox(height: 32),
                   Text(
-                    "VAULT",
+                    "SILO VAULT",
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w300,

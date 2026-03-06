@@ -20,7 +20,7 @@ class MainLayoutScreen extends StatelessWidget {
 
     switch (currentIndex) {
       case 1:
-        title = 'Notes Vault';
+        title = 'Silo Vault';
         actions = [
           IconButton(
             icon: const Icon(Icons.tune),
@@ -42,7 +42,7 @@ class MainLayoutScreen extends StatelessWidget {
         break;
       case 0:
       default:
-        title = 'Notes Vault';
+        title = 'Silo Vault';
         actions = [];
         break;
     }

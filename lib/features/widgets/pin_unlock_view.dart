@@ -32,7 +32,7 @@ class PinUnlockView extends StatelessWidget {
       children: [
         const SizedBox(height: 48), // Match top offset
         Text(
-          "Unlock Notes Vault",
+          "Unlock Silo Vault",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,

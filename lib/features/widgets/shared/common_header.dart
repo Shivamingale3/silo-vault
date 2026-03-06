@@ -7,7 +7,7 @@ class CommonHeader extends StatelessWidget {
 
   const CommonHeader({
     super.key,
-    this.title = 'Notes Vault',
+    this.title = 'Silo Vault',
     this.leading,
     this.actions,
   });
