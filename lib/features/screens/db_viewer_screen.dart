@@ -22,13 +22,24 @@ class _DbViewerScreenState extends State<DbViewerScreen> {
     _loadEntities();
   }
 
+  String? _error;
+
   Future<void> _loadEntities() async {
-    final repo = VaultRepository();
-    final entities = await repo.getAllRawEntities();
-    setState(() {
-      _entities = entities;
-      _isLoading = false;
-    });
+    try {
+      final repo = VaultRepository();
+      final entities = await repo.getAllRawEntities();
+      if (!mounted) return;
+      setState(() {
+        _entities = entities;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   Future<String> _decryptField(String ciphertext) async {
@@ -77,6 +88,39 @@ class _DbViewerScreenState extends State<DbViewerScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
+          : _error != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red.shade300,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Failed to load database',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _error!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red.shade300,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
           : _entities.isEmpty
           ? Center(
               child: Column(
@@ -100,8 +144,22 @@ class _DbViewerScreenState extends State<DbViewerScreen> {
           : ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: _entities.length,
-              itemBuilder: (context, index) =>
-                  _buildEntityCard(context, _entities[index], index),
+              itemBuilder: (context, index) {
+                try {
+                  return _buildEntityCard(context, _entities[index], index);
+                } catch (e) {
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'Error rendering entry $index: $e',
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
     );
   }
@@ -163,7 +221,7 @@ class _DbViewerScreenState extends State<DbViewerScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'ID: ${entity.itemId.substring(0, 8)}…',
+                      'ID: ${entity.itemId.length > 8 ? '${entity.itemId.substring(0, 8)}…' : entity.itemId}',
                       style: TextStyle(
                         fontSize: 12,
                         fontFamily: 'monospace',
