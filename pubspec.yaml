@@ -1,4 +1,4 @@
-name: "notes_vault"
+name: "silo_vault"
 description: "A secure place to write whatever's in your mind that you'll forget later."
 publish_to: "none"
 version: 0.1.0+1
