@@ -49,3 +49,12 @@ app.*.map.json
 
 # Designs
 designs/
+
+# Firebase & sensitive configs
+**/google-services.json
+**/GoogleService-Info.plist
+lib/firebase_options.dart
+.env
+*.keystore
+*.jks
+key.properties
