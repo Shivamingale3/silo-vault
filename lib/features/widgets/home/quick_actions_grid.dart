@@ -32,7 +32,9 @@ class QuickActionsGrid extends StatelessWidget {
             context,
             icon: Icons.vpn_key,
             label: 'Generator',
-            onTap: () {},
+            onTap: () {
+              context.go('/generator');
+            },
           ),
         ],
       ),
