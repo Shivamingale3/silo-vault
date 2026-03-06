@@ -57,4 +57,4 @@ lib/firebase_options.dart
 .env
 *.keystore
 *.jks
-key.properties
+key.propertiesupload-keystore.jks
