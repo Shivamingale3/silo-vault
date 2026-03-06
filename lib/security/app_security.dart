@@ -1,7 +1,7 @@
 import 'package:bcrypt/bcrypt.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:notes_vault/core/enums/app_enums.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
 
 class AppSecurity {
   static Future<bool> isEmulator() async {

@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:notes_vault/core/enums/app_enums.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
 
 /// Caches Firebase user profile data (name, email, photo) locally
 /// so the settings profile section works offline.

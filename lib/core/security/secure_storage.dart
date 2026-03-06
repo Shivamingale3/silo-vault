@@ -1,6 +1,6 @@
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:notes_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
 
 class SecureStorage {
   static const _secureStorage = FlutterSecureStorage();

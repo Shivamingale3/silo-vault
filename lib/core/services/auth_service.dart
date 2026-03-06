@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:notes_vault/core/services/cached_profile.dart';
+import 'package:silo_vault/core/services/cached_profile.dart';
 
 /// Handles Firebase Authentication via Google Sign-In.
 /// Caches profile data locally for offline display.

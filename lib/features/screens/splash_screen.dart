@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_vault/constants/app_routes.dart';
-import 'package:notes_vault/security/app_security.dart';
+import 'package:silo_vault/constants/app_routes.dart';
+import 'package:silo_vault/security/app_security.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

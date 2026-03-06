@@ -1,5 +1,5 @@
 import 'package:local_auth/local_auth.dart';
-import 'package:notes_vault/core/enums/security_enums.dart';
+import 'package:silo_vault/core/enums/security_enums.dart';
 import 'package:app_settings/app_settings.dart';
 
 class BiometricAuth {

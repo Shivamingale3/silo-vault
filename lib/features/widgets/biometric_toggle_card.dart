@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart'; // For CupertinoSwitch
-import 'package:notes_vault/core/enums/security_enums.dart';
+import 'package:silo_vault/core/enums/security_enums.dart';
 
 class BiometricToggleCard extends StatelessWidget {
   final bool enableBiometric;

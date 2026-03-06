@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_vault/constants/app_routes.dart';
-import 'package:notes_vault/features/widgets/home/custom_bottom_nav.dart';
-import 'package:notes_vault/features/widgets/shared/common_header.dart';
+import 'package:silo_vault/constants/app_routes.dart';
+import 'package:silo_vault/features/widgets/home/custom_bottom_nav.dart';
+import 'package:silo_vault/features/widgets/shared/common_header.dart';
 
 class MainLayoutScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;

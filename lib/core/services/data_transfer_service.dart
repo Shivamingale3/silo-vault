@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:notes_vault/core/enums/db_enums.dart';
-import 'package:notes_vault/database/vault_repository.dart';
-import 'package:notes_vault/features/models/vault_item.dart';
+import 'package:silo_vault/core/enums/db_enums.dart';
+import 'package:silo_vault/database/vault_repository.dart';
+import 'package:silo_vault/features/models/vault_item.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Handles vault data export (decrypt → JSON file) and import (JSON file → validate → encrypt → DB).

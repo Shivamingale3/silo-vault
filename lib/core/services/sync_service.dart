@@ -1,12 +1,12 @@
 import 'package:isar_community/isar.dart';
-import 'package:notes_vault/core/enums/app_enums.dart';
-import 'package:notes_vault/core/security/encryption_service.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
-import 'package:notes_vault/core/services/auth_service.dart';
-import 'package:notes_vault/core/services/connectivity_service.dart';
-import 'package:notes_vault/database/firestore_repository.dart';
-import 'package:notes_vault/database/isar.dart';
-import 'package:notes_vault/database/models/vault_item_entity.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/security/encryption_service.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/core/services/auth_service.dart';
+import 'package:silo_vault/core/services/connectivity_service.dart';
+import 'package:silo_vault/database/firestore_repository.dart';
+import 'package:silo_vault/database/isar.dart';
+import 'package:silo_vault/database/models/vault_item_entity.dart';
 
 /// Orchestrates push/pull sync between local Isar DB and Firestore.
 /// All data is encrypted before upload — Firestore never sees plaintext.

@@ -1,12 +1,12 @@
 import 'package:isar_community/isar.dart';
-import 'package:notes_vault/core/security/encryption_service.dart';
-import 'package:notes_vault/core/services/auth_service.dart';
-import 'package:notes_vault/core/services/sync_service.dart';
-import 'package:notes_vault/database/firestore_repository.dart';
-import 'package:notes_vault/database/isar.dart';
-import 'package:notes_vault/database/models/vault_item_entity.dart';
-import 'package:notes_vault/features/models/vault_item.dart';
-import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:silo_vault/core/security/encryption_service.dart';
+import 'package:silo_vault/core/services/auth_service.dart';
+import 'package:silo_vault/core/services/sync_service.dart';
+import 'package:silo_vault/database/firestore_repository.dart';
+import 'package:silo_vault/database/isar.dart';
+import 'package:silo_vault/database/models/vault_item_entity.dart';
+import 'package:silo_vault/features/models/vault_item.dart';
+import 'package:silo_vault/core/enums/db_enums.dart';
 import 'package:uuid/uuid.dart';
 
 class VaultRepository {

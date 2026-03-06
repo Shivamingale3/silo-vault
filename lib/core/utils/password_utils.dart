@@ -1,4 +1,4 @@
-import 'package:notes_vault/core/enums/db_enums.dart';
+import 'package:silo_vault/core/enums/db_enums.dart';
 
 class PasswordUtils {
   /// Calculates password strength based on entropy factors.

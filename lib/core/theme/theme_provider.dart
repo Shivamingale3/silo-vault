@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_vault/core/enums/app_enums.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
 
 class ThemeNotifier extends Notifier<AppThemeMode> {
   final AppThemeMode _initialTheme;

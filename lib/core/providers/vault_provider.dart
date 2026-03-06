@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_vault/database/vault_repository.dart';
-import 'package:notes_vault/features/models/vault_item.dart';
+import 'package:silo_vault/database/vault_repository.dart';
+import 'package:silo_vault/features/models/vault_item.dart';
 
 /// Holds all vault items in memory after decryption from DB.
 /// UI reads from this provider; writes go through the notifier

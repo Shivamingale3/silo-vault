@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/constants/app_routes.dart';
-import 'package:notes_vault/core/enums/security_enums.dart';
-import 'package:notes_vault/core/routing/app_router.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
-import 'package:notes_vault/features/widgets/biometric_dialogs.dart';
-import 'package:notes_vault/features/widgets/pin_setup_view.dart';
-import 'package:notes_vault/security/biometric_auth.dart';
+import 'package:silo_vault/constants/app_routes.dart';
+import 'package:silo_vault/core/enums/security_enums.dart';
+import 'package:silo_vault/core/routing/app_router.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/features/widgets/biometric_dialogs.dart';
+import 'package:silo_vault/features/widgets/pin_setup_view.dart';
+import 'package:silo_vault/security/biometric_auth.dart';
 
 class PinSetupScreen extends StatefulWidget {
   const PinSetupScreen({super.key});

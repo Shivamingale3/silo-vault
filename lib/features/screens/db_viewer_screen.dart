@@ -1,7 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
-import 'package:notes_vault/core/security/encryption_service.dart';
-import 'package:notes_vault/database/models/vault_item_entity.dart';
-import 'package:notes_vault/database/vault_repository.dart';
+import 'package:silo_vault/core/security/encryption_service.dart';
+import 'package:silo_vault/database/models/vault_item_entity.dart';
+import 'package:silo_vault/database/vault_repository.dart';
 
 class DbViewerScreen extends StatefulWidget {
   const DbViewerScreen({super.key});
@@ -378,9 +380,6 @@ class _DbViewerScreenState extends State<DbViewerScreen> {
     String label,
     String? ciphertext,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final colorScheme = Theme.of(context).colorScheme;
-
     if (ciphertext == null) {
       return _buildFieldRow(context, label, 'null');
     }
@@ -427,41 +426,41 @@ class _DbViewerScreenState extends State<DbViewerScreen> {
             child: GestureDetector(
               onTap: () async {
                 final decrypted = await _decryptField(ciphertext);
-                if (mounted) {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      backgroundColor: colorScheme.surfaceContainer,
-                      title: Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      content: SelectableText(
-                        decrypted,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontFamily: 'monospace',
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Close'),
-                        ),
-                      ],
+                if (!mounted) return;
+                final ctx = this.context;
+                final theme = Theme.of(ctx);
+                final cs = theme.colorScheme;
+                final isDark = theme.brightness == Brightness.dark;
+                showDialog(
+                  context: ctx,
+                  builder: (dialogCtx) => AlertDialog(
+                    backgroundColor: cs.surfaceContainer,
+                    title: Text(
+                      label,
+                      style: TextStyle(fontSize: 14, color: cs.onSurface),
                     ),
-                  );
-                }
+                    content: SelectableText(
+                      decrypted,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'monospace',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogCtx),
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
+                );
               },
               child: Text(
                 'Tap to decrypt →',
                 style: TextStyle(
                   fontSize: 10,
-                  color: colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

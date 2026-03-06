@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:notes_vault/core/services/auth_service.dart';
-import 'package:notes_vault/database/models/vault_item_entity.dart';
+import 'package:silo_vault/core/services/auth_service.dart';
+import 'package:silo_vault/database/models/vault_item_entity.dart';
 
 /// Handles all Firestore CRUD for encrypted vault items and sync config.
 /// Data stored here is already encrypted — Firestore never sees plaintext.

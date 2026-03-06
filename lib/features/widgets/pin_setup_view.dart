@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/core/enums/security_enums.dart';
-import 'package:notes_vault/features/widgets/biometric_toggle_card.dart';
-import 'package:notes_vault/features/widgets/custom_num_pad.dart';
-import 'package:notes_vault/features/widgets/pin_indicators.dart';
+import 'package:silo_vault/core/enums/security_enums.dart';
+import 'package:silo_vault/features/widgets/biometric_toggle_card.dart';
+import 'package:silo_vault/features/widgets/custom_num_pad.dart';
+import 'package:silo_vault/features/widgets/pin_indicators.dart';
 
 class PinSetupView extends StatelessWidget {
   final int step;

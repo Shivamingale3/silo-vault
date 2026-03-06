@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:notes_vault/constants/app_routes.dart';
-import 'package:notes_vault/core/routing/app_router.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/constants/app_routes.dart';
+import 'package:silo_vault/core/routing/app_router.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
 
 class AppLifecycleObserver extends WidgetsBindingObserver {
   DateTime? _backgroundedAt;

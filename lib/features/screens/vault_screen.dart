@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/features/widgets/vault_view.dart';
+import 'package:silo_vault/features/widgets/vault_view.dart';
 
 class VaultScreen extends StatelessWidget {
   const VaultScreen({super.key});

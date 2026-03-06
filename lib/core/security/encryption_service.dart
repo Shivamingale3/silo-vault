@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart';
-import 'package:notes_vault/core/enums/app_enums.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
 
 /// AES-256-CBC encryption with a randomly generated key stored in
 /// [FlutterSecureStorage]. Each call to [encrypt] produces a unique

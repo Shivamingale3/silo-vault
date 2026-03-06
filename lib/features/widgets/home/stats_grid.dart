@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_vault/core/providers/vault_provider.dart';
+import 'package:silo_vault/core/providers/vault_provider.dart';
 
 class StatsGrid extends ConsumerWidget {
   const StatsGrid({super.key});

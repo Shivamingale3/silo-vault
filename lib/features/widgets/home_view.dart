@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_vault/core/providers/vault_provider.dart';
+import 'package:silo_vault/core/providers/vault_provider.dart';
 import '../models/vault_item.dart';
 import 'home/search_bar_widget.dart';
 import 'home/quick_actions_grid.dart';

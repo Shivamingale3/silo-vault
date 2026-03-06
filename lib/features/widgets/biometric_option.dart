@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/core/enums/security_enums.dart';
+import 'package:silo_vault/core/enums/security_enums.dart';
 
 class BiometricOption extends StatelessWidget {
   final bool enableBiometric;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_vault/core/enums/db_enums.dart';
-import 'package:notes_vault/core/providers/vault_provider.dart';
-import 'package:notes_vault/core/utils/password_utils.dart';
-import 'package:notes_vault/features/models/vault_item.dart';
-import 'package:notes_vault/features/widgets/upsert/amoled_input.dart';
+import 'package:silo_vault/core/enums/db_enums.dart';
+import 'package:silo_vault/core/providers/vault_provider.dart';
+import 'package:silo_vault/core/utils/password_utils.dart';
+import 'package:silo_vault/features/models/vault_item.dart';
+import 'package:silo_vault/features/widgets/upsert/amoled_input.dart';
 
 class EditPasswordScreen extends ConsumerStatefulWidget {
   final VaultItem item;

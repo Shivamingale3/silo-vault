@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_vault/constants/app_routes.dart';
-import 'package:notes_vault/core/enums/security_enums.dart';
-import 'package:notes_vault/core/security/secure_storage.dart';
-import 'package:notes_vault/features/widgets/pin_unlock_view.dart';
-import 'package:notes_vault/features/widgets/security_lockout_view.dart';
-import 'package:notes_vault/security/app_security.dart';
-import 'package:notes_vault/security/biometric_auth.dart';
+import 'package:silo_vault/constants/app_routes.dart';
+import 'package:silo_vault/core/enums/security_enums.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
+import 'package:silo_vault/features/widgets/pin_unlock_view.dart';
+import 'package:silo_vault/features/widgets/security_lockout_view.dart';
+import 'package:silo_vault/security/app_security.dart';
+import 'package:silo_vault/security/biometric_auth.dart';
 
 class AppLockScreen extends StatefulWidget {
   const AppLockScreen({super.key});

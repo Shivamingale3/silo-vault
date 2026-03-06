@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/features/widgets/custom_num_pad.dart';
-import 'package:notes_vault/features/widgets/pin_indicators.dart';
+import 'package:silo_vault/features/widgets/custom_num_pad.dart';
+import 'package:silo_vault/features/widgets/pin_indicators.dart';
 
 class PinUnlockView extends StatelessWidget {
   final String pin;

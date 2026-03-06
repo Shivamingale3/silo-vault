@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/features/widgets/pin_input.dart';
+import 'package:silo_vault/features/widgets/pin_input.dart';
 
 class PinInputSection extends StatelessWidget {
   final int step;

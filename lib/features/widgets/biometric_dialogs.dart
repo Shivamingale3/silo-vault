@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_vault/security/biometric_auth.dart';
+import 'package:silo_vault/security/biometric_auth.dart';
 
 /// Shows a retry/skip dialog when biometric authentication fails or is cancelled.
 Future<bool?> showBiometricRetryDialog(BuildContext context, String message) {
