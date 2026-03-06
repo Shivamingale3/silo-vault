@@ -1,0 +1,197 @@
+# Contributing to Silo Vault
+
+Thanks for your interest in contributing! This guide covers the project architecture, development setup, and contribution workflow.
+
+---
+
+## Prerequisites
+
+- **Flutter SDK** `>= 3.11.0`
+- **Dart SDK** `>= 3.11.0`
+- **Android Studio** or **VS Code** with Flutter extensions
+- **Firebase CLI** (for cloud sync development)
+- A physical device or emulator for testing
+
+---
+
+## Development Setup
+
+```bash
+# 1. Clone and enter the project
+git clone https://github.com/Shivamingale3/silo-vault.git
+cd silo-vault
+
+# 2. Install dependencies
+flutter pub get
+
+# 3. Generate Isar schemas (required after model changes)
+dart run build_runner build
+
+# 4. Configure Firebase (cloud sync development only)
+flutterfire configure
+
+# 5. Run on a connected device
+flutter run
+```
+
+### Firebase Setup (Optional)
+
+Cloud sync features require a Firebase project:
+
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Enable **Authentication** → Google Sign-In
+3. Create a **Firestore Database** in test mode
+4. Add SHA-1 and SHA-256 fingerprints to your Android app in Firebase Console
+5. Run `flutterfire configure` to generate config files
+
+---
+
+## Project Architecture
+
+```
+lib/
+├── constants/           # Route constants, app-wide keys
+├── core/
+│   ├── config/          # App configuration
+│   ├── enums/           # TypeScript-style enums (app_enums, db_enums)
+│   ├── providers/       # Riverpod providers (vault, auth, connectivity)
+│   ├── routing/         # GoRouter configuration
+│   ├── security/        # Encryption service, secure storage wrapper
+│   ├── services/        # Auth, sync, connectivity services
+│   ├── theme/           # Dark/light theme definitions
+│   └── utils/           # Utility helpers
+├── database/
+│   ├── models/          # Isar entity definitions
+│   ├── isar.dart        # Isar DB initialization
+│   ├── vault_repository.dart    # CRUD with encryption bridge
+│   └── firestore_repository.dart # Firestore CRUD for cloud sync
+├── features/
+│   ├── models/          # Domain models (VaultItem)
+│   ├── screens/         # Full-page screens
+│   └── widgets/         # Reusable UI components
+│       ├── home/        # Dashboard widgets (stats, favorites, etc.)
+│       ├── vault/       # Vault list components
+│       ├── sync/        # Sync dialogs and sheets
+│       ├── forms/       # Form components
+│       └── shared/      # Common widgets (header, etc.)
+├── security/            # App-level security (PIN, lockout)
+└── main.dart            # App entry point
+```
+
+### Key Patterns
+
+| Pattern              | Implementation                                                    |
+| -------------------- | ----------------------------------------------------------------- |
+| **State Management** | Riverpod (`AsyncNotifier` for vault, `Provider` for derived data) |
+| **Routing**          | GoRouter with declarative route definitions                       |
+| **Database**         | Isar (local NoSQL) with encrypted fields                          |
+| **Cloud Sync**       | Firestore with E2E encryption (data encrypted before upload)      |
+| **Security**         | AES-256-CBC encryption, bcrypt PIN hashing, PBKDF2 key derivation |
+| **Architecture**     | Feature-first with repository pattern for data access             |
+
+### Data Flow
+
+```
+UI (Screens/Widgets)
+    ↕ Riverpod Providers
+VaultNotifier (state management)
+    ↕
+VaultRepository (encrypt ↔ decrypt bridge)
+    ↕                    ↕
+Isar DB (local)    FirestoreRepository (cloud)
+```
+
+### Encryption Flow
+
+1. **Write**: `VaultItem` → `EncryptionService.encrypt()` → `VaultItemEntity` (ciphertext) → Isar
+2. **Read**: Isar → `VaultItemEntity` → `EncryptionService.decrypt()` → `VaultItem` (plaintext)
+3. **Sync Push**: Isar entity (already encrypted) → Firestore (no re-encryption needed)
+4. **Sync Pull**: Firestore → Isar entity → decrypted on read
+
+---
+
+## Code Conventions
+
+### General
+
+- Use **types** instead of interfaces
+- Use **native Dart enums** (no string constants)
+- Validate all API/input data before processing
+- Reuse existing functions — check before writing new ones
+
+### File Organization
+
+- Keep files under ~300 lines; break large components into smaller widgets
+- One class per file (with the exception of closely related helper classes)
+- Use barrel exports where appropriate
+
+### Naming
+
+- Files: `snake_case.dart`
+- Classes: `PascalCase`
+- Functions/variables: `camelCase`
+- Constants/enums: `camelCase`
+- Private members: `_prefixed`
+
+### State Management
+
+- Use `AsyncNotifier` for async data sources
+- Derived providers for filtered/computed data (e.g., `activeItemsProvider`, `favoriteItemsProvider`)
+- Never store decrypted data persistently — decrypt in memory only
+
+---
+
+## Contribution Workflow
+
+1. **Fork** the repository
+2. **Create a branch**: `git checkout -b feature/your-feature`
+3. **Make changes** following the conventions above
+4. **Test** on a physical device (biometrics can't be tested on emulators)
+5. **Build check**: `flutter build apk --debug` must pass with zero errors
+6. **Submit a PR** with a clear description of what changed and why
+
+### Good First Issues
+
+Look for issues tagged `good first issue` or `help wanted`. Areas that commonly need help:
+
+- UI polish and accessibility improvements
+- Additional password strength rules
+- Localization / i18n support
+- Unit and widget tests
+
+---
+
+## Security Considerations
+
+If you're working on security-related code:
+
+- **Never** log decrypted data, even in debug mode
+- **Never** store plaintext secrets in SharedPreferences (use `flutter_secure_storage`)
+- **Never** send unencrypted vault data to Firestore
+- **Always** use `EncryptionService` for any data that touches the database
+- Report security vulnerabilities privately — do **not** open a public issue
+
+---
+
+## Dependencies
+
+| Package                                               | Purpose                                              |
+| ----------------------------------------------------- | ---------------------------------------------------- |
+| `flutter_riverpod`                                    | State management                                     |
+| `isar_community`                                      | Local NoSQL database                                 |
+| `flutter_secure_storage`                              | Secure key storage (Android Keystore / iOS Keychain) |
+| `encrypt`                                             | AES-256-CBC encryption                               |
+| `bcrypt`                                              | PIN hashing                                          |
+| `firebase_core` / `firebase_auth` / `cloud_firestore` | Cloud sync                                           |
+| `google_sign_in`                                      | Google authentication                                |
+| `local_auth`                                          | Biometric authentication                             |
+| `go_router`                                           | Declarative routing                                  |
+| `google_fonts`                                        | Typography                                           |
+| `connectivity_plus`                                   | Network state monitoring                             |
+| `uuid`                                                | Unique item identifiers for cross-device sync        |
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
