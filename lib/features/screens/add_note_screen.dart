@@ -82,10 +82,10 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
             splashFactory: NoSplash.splashFactory,
           ),
         ),
-        title: const Text(
+        title: Text(
           'New Note',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -106,7 +106,10 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.white12, height: 1),
+          child: Container(
+            color: isDark ? Colors.white12 : Colors.black12,
+            height: 1,
+          ),
         ),
       ),
       body: Column(
@@ -120,10 +123,10 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
                     controller: _titleController,
                     hintText: 'Note title',
                     borderless: true,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -132,9 +135,9 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
                     hintText: 'Start writing...',
                     borderless: true,
                     maxLines: null,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white70,
+                      color: isDark ? Colors.white70 : Colors.black87,
                       height: 1.5,
                     ),
                   ),
@@ -182,14 +185,14 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white30,
+                          color: isDark ? Colors.white30 : Colors.black26,
                           style: BorderStyle.solid,
                         ), // Dashed border not easily supported natively, fallback to solid
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.add,
                         size: 20,
-                        color: Colors.white54,
+                        color: isDark ? Colors.white54 : Colors.black54,
                       ),
                     ),
                   ),
@@ -206,16 +209,24 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen> {
             },
             icon: Icon(
               _isFavorite ? Icons.star : Icons.star_border,
-              color: _isFavorite ? Colors.amber : Colors.white54,
+              color: _isFavorite
+                  ? Colors.amber
+                  : (isDark ? Colors.white54 : Colors.black54),
             ),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.image, color: Colors.white54),
+            icon: Icon(
+              Icons.image,
+              color: isDark ? Colors.white54 : Colors.black54,
+            ),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.checklist, color: Colors.white54),
+            icon: Icon(
+              Icons.checklist,
+              color: isDark ? Colors.white54 : Colors.black54,
+            ),
           ),
         ],
       ),

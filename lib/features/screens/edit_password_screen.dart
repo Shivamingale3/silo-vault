@@ -119,18 +119,18 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
     final primaryColor = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF121212).withValues(alpha: 0.95),
+        backgroundColor: theme.scaffoldBackgroundColor.withValues(alpha: 0.95),
         elevation: 0,
         leading: IconButton(
           onPressed: () => context.pop(),
           icon: Icon(Icons.chevron_left, color: primaryColor, size: 28),
         ),
-        title: const Text(
+        title: Text(
           'Edit Password',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
@@ -152,7 +152,12 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.white10, height: 1),
+          child: Container(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white10
+                : Colors.black12,
+            height: 1,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -172,6 +177,7 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
   }
 
   Widget _buildHeaderWidget(Color primaryColor) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Container(
@@ -188,29 +194,33 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
         const SizedBox(height: 16),
         Text(
           widget.item.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           'Last updated ${widget.item.timeAgoUpdated.toLowerCase()}',
-          style: const TextStyle(fontSize: 14, color: Colors.white54),
+          style: TextStyle(
+            fontSize: 14,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildFormSection() {
+    final theme = Theme.of(context);
     return Column(
       children: [
         AmoledInput(
           label: 'Title',
           controller: _titleController,
           hintText: 'e.g. Netflix, Work Email',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 16),
         AmoledInput(
@@ -219,9 +229,9 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
           hintText: 'Username or Email',
           keyboardType: TextInputType.emailAddress,
           suffixIcon: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.content_copy,
-              color: Colors.white54,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
               size: 20,
             ),
             onPressed: () {},
@@ -232,14 +242,17 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
           label: 'Password',
           controller: _passwordController,
           obscureText: !_isPasswordVisible,
-          style: const TextStyle(fontFamily: 'monospace', color: Colors.white),
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: theme.colorScheme.onSurface,
+          ),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.white54,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                   size: 20,
                 ),
                 onPressed: () {
@@ -249,9 +262,9 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.refresh,
-                  color: Colors.white54,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                   size: 20,
                 ),
                 onPressed: () {},
@@ -280,6 +293,7 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
   }
 
   Widget _buildPasswordStrengthIndicator() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
@@ -323,11 +337,18 @@ class _EditPasswordScreenState extends ConsumerState<EditPasswordScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.info, size: 14, color: Colors.white54),
+              Icon(
+                Icons.info,
+                size: 14,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+              ),
               const SizedBox(width: 4),
-              const Text(
+              Text(
                 'Consider a stronger password with symbols and numbers.',
-                style: TextStyle(fontSize: 11, color: Colors.white54),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+                ),
               ),
             ],
           ),

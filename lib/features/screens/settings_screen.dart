@@ -8,6 +8,8 @@ import 'package:notes_vault/core/providers/vault_provider.dart';
 import 'package:notes_vault/core/security/secure_storage.dart';
 import 'package:notes_vault/core/services/data_transfer_service.dart';
 import 'package:notes_vault/core/theme/theme_provider.dart';
+import 'package:notes_vault/security/biometric_auth.dart';
+import 'package:notes_vault/core/enums/security_enums.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -22,7 +24,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   int _versionClickCount = 0;
   int _autoLockSeconds = 60;
   int _maxAttempts = 5;
-  bool _loaded = false;
+  // bool _loaded = false;
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _biometricUnlock = bio;
       _autoLockSeconds = lock;
       _maxAttempts = attempts;
-      _loaded = true;
+      // _loaded = true;
     });
   }
 
@@ -372,8 +374,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingsToggleItem('Biometric Unlock', _biometricUnlock, (
                   val,
                 ) async {
-                  await SecureStorage.setBiometricStatus(val);
-                  setState(() => _biometricUnlock = val);
+                  final result = await BiometricAuth.authenticate();
+                  if (result == BiometricResult.success) {
+                    await SecureStorage.setBiometricStatus(val);
+                    setState(() => _biometricUnlock = val);
+                  } else {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Authentication required to change this setting',
+                          ),
+                        ),
+                      );
+                    }
+                  }
                 }, primaryColor),
                 _buildDivider(),
                 _buildSettingsLabelItem(

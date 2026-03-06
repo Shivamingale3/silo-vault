@@ -6,6 +6,7 @@ class PinUnlockView extends StatelessWidget {
   final String pin;
   final String? errorMessage;
   final bool isProcessing;
+  final bool isBiometricEnabled;
   final Function(String) onDigitTap;
   final VoidCallback onBackspaceTap;
   final VoidCallback onBiometricTap;
@@ -15,6 +16,7 @@ class PinUnlockView extends StatelessWidget {
     required this.pin,
     this.errorMessage,
     required this.isProcessing,
+    required this.isBiometricEnabled,
     required this.onDigitTap,
     required this.onBackspaceTap,
     required this.onBiometricTap,
@@ -81,7 +83,12 @@ class PinUnlockView extends StatelessWidget {
 
         const SizedBox(height: 32),
 
-        if (!isProcessing)
+        if (isProcessing)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: CircularProgressIndicator(),
+          )
+        else if (isBiometricEnabled)
           TextButton.icon(
             onPressed: onBiometricTap,
             icon: Icon(

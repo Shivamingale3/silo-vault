@@ -171,10 +171,13 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                   ),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Last updated: Just now',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 10, color: Colors.white54),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+                ),
               ),
             ),
           ),
@@ -184,21 +187,26 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
   }
 
   Widget _buildHeaderSection() {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
           children: [
-            const Icon(Icons.lock, color: Colors.white54, size: 24),
+            Icon(
+              Icons.lock,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+              size: 24,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: AmoledInput(
                 controller: _titleController,
                 hintText: 'e.g. Service Name',
                 borderless: true,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ),
@@ -211,6 +219,7 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
   }
 
   Widget _buildCredentialsSection() {
+    final theme = Theme.of(context);
     return Column(
       children: [
         AmoledInput(
@@ -224,14 +233,17 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
           label: 'Password',
           controller: _passwordController,
           obscureText: !_isPasswordVisible,
-          style: const TextStyle(fontFamily: 'monospace', color: Colors.white),
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: theme.colorScheme.onSurface,
+          ),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.white54,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                   size: 20,
                 ),
                 onPressed: () {
@@ -241,9 +253,9 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.content_copy,
-                  color: Colors.white54,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                   size: 20,
                 ),
                 onPressed: () {},
@@ -374,6 +386,8 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
   }
 
   Widget _buildFooterSection() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -381,15 +395,15 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 4, bottom: 12),
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 12),
                 child: Text(
                   'TAGS',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
-                    color: Colors.white54,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                   ),
                 ),
               ),
@@ -425,15 +439,17 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.white30,
+                          color: isDark ? Colors.white30 : Colors.black26,
                           style: BorderStyle.solid,
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.add,
                         size: 14,
-                        color: Colors.white54,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.54,
+                        ),
                       ),
                     ),
                   ),
@@ -445,15 +461,15 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
         const SizedBox(width: 16),
         Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 'FAVORITE',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
-                  color: Colors.white54,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                 ),
               ),
             ),
@@ -464,11 +480,15 @@ class _AddPasswordScreenState extends ConsumerState<AddPasswordScreen> {
                 height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24),
+                  border: Border.all(
+                    color: isDark ? Colors.white24 : Colors.black12,
+                  ),
                 ),
                 child: Icon(
                   _isFavorite ? Icons.star : Icons.star_border,
-                  color: _isFavorite ? Colors.amber : Colors.white54,
+                  color: _isFavorite
+                      ? Colors.amber
+                      : (isDark ? Colors.white54 : Colors.black54),
                   size: 20,
                 ),
               ),

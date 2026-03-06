@@ -60,7 +60,7 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
     // though it can adapt slightly if needed.
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    // final isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -84,10 +84,10 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
             splashFactory: NoSplash.splashFactory,
           ),
         ),
-        title: const Text(
+        title: Text(
           'Edit Note',
           style: TextStyle(
-            color: Colors.black,
+            color: theme.colorScheme.onSurface,
             fontSize: 17,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
@@ -109,7 +109,10 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.black12, height: 1),
+          child: Container(
+            color: isDark ? Colors.white12 : Colors.black12,
+            height: 1,
+          ),
         ),
       ),
       body: Stack(
@@ -129,30 +132,34 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
                     children: [
                       TextField(
                         controller: _titleController,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: theme.colorScheme.onSurface,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Note Title',
                           border: InputBorder.none,
-                          hintStyle: TextStyle(color: Colors.black38),
+                          hintStyle: TextStyle(
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: _contentController,
                         maxLines: null,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 17,
                           height: 1.5,
-                          color: Colors.black87,
+                          color: theme.colorScheme.onSurface,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Start writing...',
                           border: InputBorder.none,
-                          hintStyle: TextStyle(color: Colors.black38),
+                          hintStyle: TextStyle(
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
                         ),
                       ),
                     ],
@@ -208,16 +215,20 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                icon: const Icon(Icons.share, color: Colors.black45, size: 20),
+                icon: Icon(
+                  Icons.share,
+                  color: isDark ? Colors.white54 : Colors.black45,
+                  size: 20,
+                ),
                 onPressed: () {},
               ),
               const SizedBox(width: 16),
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                icon: const Icon(
+                icon: Icon(
                   Icons.info_outline,
-                  color: Colors.black45,
+                  color: isDark ? Colors.white54 : Colors.black45,
                   size: 20,
                 ),
                 onPressed: () {},
@@ -307,24 +318,30 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.format_list_bulleted,
-                  color: Colors.black54,
+                  color: isDark ? Colors.white54 : Colors.black54,
                 ),
                 onPressed: () {},
               ),
               IconButton(
-                icon: const Icon(Icons.text_fields, color: Colors.black54),
+                icon: Icon(
+                  Icons.text_fields,
+                  color: isDark ? Colors.white54 : Colors.black54,
+                ),
                 onPressed: () {},
               ),
               IconButton(
-                icon: const Icon(Icons.image, color: Colors.black54),
+                icon: Icon(
+                  Icons.image,
+                  color: isDark ? Colors.white54 : Colors.black54,
+                ),
                 onPressed: () {},
               ),
               Container(
                 width: 1,
                 height: 24,
-                color: Colors.black12,
+                color: isDark ? Colors.white12 : Colors.black12,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
               ),
               IconButton(
@@ -335,7 +352,9 @@ class _EditNoteScreenState extends ConsumerState<EditNoteScreen> {
                 },
                 icon: Icon(
                   _isFavorite ? Icons.star : Icons.star_border,
-                  color: _isFavorite ? Colors.amber : Colors.black54,
+                  color: _isFavorite
+                      ? Colors.amber
+                      : (isDark ? Colors.white54 : Colors.black54),
                 ),
               ),
             ],

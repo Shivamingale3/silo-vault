@@ -21,6 +21,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
   String? errorMessage;
   bool isProcessing = false;
   bool isLockedOut = false;
+  bool isBiometricEnabled = false;
   int failedAttempts = 0;
   int maxFailedAttempts = 3;
   DateTime? lockoutUntil;
@@ -64,10 +65,14 @@ class _AppLockScreenState extends State<AppLockScreen> {
       failedAttempts = 0;
     }
 
-    if (!mounted) return;
-    setState(() {});
+    final biometricStatus = await SecureStorage.getBiometricStatus();
 
-    if (await SecureStorage.getBiometricStatus()) {
+    if (!mounted) return;
+    setState(() {
+      isBiometricEnabled = biometricStatus;
+    });
+
+    if (biometricStatus) {
       await _attemptBiometric();
     }
   }
@@ -287,6 +292,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                             pin: pin,
                             errorMessage: errorMessage,
                             isProcessing: isProcessing,
+                            isBiometricEnabled: isBiometricEnabled,
                             onDigitTap: _onDigitTap,
                             onBackspaceTap: _onBackspaceTap,
                             onBiometricTap: _attemptBiometric,
