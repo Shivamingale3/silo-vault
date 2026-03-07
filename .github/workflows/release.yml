@@ -60,7 +60,6 @@ jobs:
 
       # ── Signing (from Secrets) ──
       - name: Decode Keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
