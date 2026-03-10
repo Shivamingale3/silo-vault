@@ -61,19 +61,8 @@ jobs:
       # ── Signing (from Secrets) ──
       - name: Decode Keystore
         run: |
+          mkdir -p android/app
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
-          cat > android/key.properties << EOF
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=upload-keystore.jks
-          EOF
-
-      - name: Verify Secrets
-        run: |
-          if [ ! -f "android/app/google-services.json" ]; then echo "Missing google-services.json"; exit 1; fi
-          if [ ! -f "android/app/upload-keystore.jks" ]; then echo "Missing keystore"; exit 1; fi
-          if [ ! -f "android/key.properties" ]; then echo "Missing key.properties"; exit 1; fi
 
       # ── Update Version ──
       - name: Update pubspec version from tag
@@ -97,6 +86,11 @@ jobs:
 
       - name: Build Release APK
         run: flutter build apk --release
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_FILE: upload-keystore.jks
 
       # ── Changelog ──
       - name: Generate Changelog

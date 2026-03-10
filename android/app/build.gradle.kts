@@ -29,6 +29,7 @@ android {
     }
 
     kotlinOptions {
+        @Suppress("DEPRECATION")
         jvmTarget = JavaVersion.VERSION_21.toString()
     }
 
@@ -41,20 +42,28 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
+        // Priority: key.properties > Environment Variables
+        val alias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
+        val keyPass = keystoreProperties.getProperty("keyPassword") ?: System.getenv("KEY_PASSWORD")
+        val storePass = keystoreProperties.getProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
+        val storeFilePath = keystoreProperties.getProperty("storeFile") ?: System.getenv("KEYSTORE_FILE")
+
+        if (alias != null && keyPass != null && storePass != null && storeFilePath != null) {
             create("release") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = alias
+                keyPassword = keyPass
+                storePassword = storePass
+                storeFile = file(storeFilePath)
             }
         }
     }
 
     buildTypes {
-        release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
+        getByName("release") {
+            // Use release signing if defined and file exists, otherwise fallback to debug
+            val releaseConfig = signingConfigs.findByName("release")
+            signingConfig = if (releaseConfig?.storeFile?.exists() == true) {
+                releaseConfig
             } else {
                 signingConfigs.getByName("debug")
             }
