@@ -18,7 +18,10 @@ import 'package:silo_vault/features/screens/edit_password_screen.dart';
 import 'package:silo_vault/features/screens/password_generator_screen.dart';
 import 'package:silo_vault/features/screens/settings_screen.dart';
 import 'package:silo_vault/features/screens/db_viewer_screen.dart';
+import 'package:silo_vault/features/screens/update_screen.dart';
 import 'package:silo_vault/features/models/vault_item.dart';
+import 'package:silo_vault/core/enums/app_enums.dart';
+import 'package:silo_vault/core/security/secure_storage.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -37,6 +40,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.appLock,
       builder: (context, state) => const AppLockScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.update,
+      builder: (context, state) => const UpdateScreen(),
     ),
     GoRoute(
       path: AppRoutes.addNote,
@@ -119,6 +126,14 @@ final appRouter = GoRouter(
       ],
     ),
   ],
+  redirect: (context, state) async {
+    // Check for mandatory update
+    final isUpdateAvailable = await SecureStorage.read(AppKeys.updateAvailable);
+    if (isUpdateAvailable == 'true' && state.matchedLocation != AppRoutes.update) {
+      return AppRoutes.update;
+    }
+    return null;
+  },
   errorBuilder: (context, state) {
     return ErrorScreen(error: state.error);
   },

@@ -16,6 +16,8 @@ enum AppKeys {
   cachedDisplayName,
   cachedEmail,
   cachedPhotoPath,
+  updateAvailable,
+  updateVersion,
 }
 
 enum AppThemeMode { light, dark, amoled }

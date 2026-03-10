@@ -13,4 +13,5 @@ class AppRoutes {
   static const String dbViewer = '/db-viewer';
   static const String passwordGenerator = '/password-generator';
   static const String testScreen = '/test-screen';
+  static const String update = '/update';
 }
